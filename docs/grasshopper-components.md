@@ -47,3 +47,20 @@ The component reports Grasshopper warnings/errors for invalid IP addresses, inva
 ### Backwards Compatibility
 
 The first four inputs and first five outputs keep their original order. New inputs and outputs are appended so existing definitions should be migration-friendly.
+
+## Geometry and Calibration Components
+
+All components below are small, composable operations and are not tightly coupled to live NatNet capture.
+
+| Component | Category | Purpose |
+| --- | --- | --- |
+| `Rigid Body To Plane` | `Tracker > Geometry` | Pose origin + quaternion to Rhino plane conversion with scale and Y-up options. |
+| `Rigid Body To Transform` | `Tracker > Geometry` | Pose origin + quaternion to Rhino transform conversion. |
+| `Markers To Points` | `Tracker > Geometry` | Marker cloud conversion with explicit scaling, axis remap, and optional world transform. |
+| `Apply OptiTrack Transform` | `Tracker > Geometry` | Applies calibration/world transforms to geometry branches. |
+| `Filter Rigid Bodies` | `Tracker > Geometry` | Include/exclude rigid body lists by regex patterns. |
+| `Calibrate OptiTrack Frame` | `Tracker > Calibration` | Builds source-to-target calibration transform and applies it to a plane. |
+| `Smooth Pose Stream` | `Tracker > Calibration` | Exponential smoothing for real-time pose streams. |
+| `Velocity / Acceleration Estimate` | `Tracker > Calibration` | Estimates velocity/acceleration from timestamped points. |
+
+Telemetry for these components is optional and disabled by default. When enabled, only sanitized aggregate operation metrics are reported.
