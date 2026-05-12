@@ -63,6 +63,21 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Icons.resx</DependentUpon>
     </Compile>
+    <Compile Include="OptiTrack\Core\IOptiTrackClient.cs" />
+    <Compile Include="OptiTrack\Core\OptiTrackConnectionInfo.cs" />
+    <Compile Include="OptiTrack\Core\OptiTrackConnectionOptions.cs" />
+    <Compile Include="OptiTrack\Core\OptiTrackConnectionStatus.cs" />
+    <Compile Include="OptiTrack\Core\OptiTrackEventArgs.cs" />
+    <Compile Include="OptiTrack\Core\OptiTrackModels.cs" />
+    <Compile Include="OptiTrack\NatNet\NatNetFrameConverter.cs" />
+    <Compile Include="OptiTrack\NatNet\NatNetOptiTrackClient.cs" />
+    <Compile Include="OptiTrack\Telemetry\ITelemetryService.cs" />
+    <Compile Include="OptiTrack\Telemetry\NoOpTelemetryService.cs" />
+    <Compile Include="OptiTrack\Telemetry\TelemetryContext.cs" />
+    <Compile Include="OptiTrack\Telemetry\TelemetryEvent.cs" />
+    <Compile Include="OptiTrack\Telemetry\TelemetrySanitizer.cs" />
+    <Compile Include="OptiTrack\Telemetry\TelemetryScope.cs" />
+    <Compile Include="OptiTrack\Telemetry\TelemetrySeverity.cs" />
     <Compile Include="TrackerComponent.cs" />
     <Compile Include="TrackerInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

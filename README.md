@@ -75,7 +75,7 @@ Maintainers may use the Codex Sentry plugin for read-only issue review, but that
 
 ## Version
 
-Current modernization target: `v1.2.0`.
+Current modernization target: `v1.3.0`.
 
 ## Contributors
 
