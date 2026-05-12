@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle( "Tracker" )]
 [assembly: AssemblyDescription( "Supports real-time motion tracking with OptiTrack camera systems using NaturalPoint's NatNet API." )]
 [assembly: AssemblyConfiguration( "" )]
-[assembly: AssemblyCompany( "Axis" )]
+[assembly: AssemblyCompany( "Graph Technologies" )]
 [assembly: AssemblyProduct( "Tracker" )]
-[assembly: AssemblyCopyright( "Copyright © 2019" )]
+[assembly: AssemblyCopyright( "Copyright © 2019-2026" )]
 [assembly: AssemblyTrademark( "" )]
 [assembly: AssemblyCulture( "" )]
 
@@ -27,5 +27,6 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers by
 // using the '*' as shown below: [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion( "1.0.0.0" )]
-[assembly: AssemblyFileVersion( "1.0.0.0" )]
+[assembly: AssemblyVersion( "1.2.0.0" )]
+[assembly: AssemblyFileVersion( "1.2.0.0" )]
+[assembly: AssemblyInformationalVersion( "1.2.0" )]

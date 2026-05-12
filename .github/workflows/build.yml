@@ -1,0 +1,28 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - main
+      - release/**
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Windows Release Build
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore packages
+        run: msbuild Tracker.sln /t:Restore /p:Configuration=Release /p:Platform="Any CPU"
+
+      - name: Build
+        run: msbuild Tracker.sln /p:Configuration=Release /p:Platform="Any CPU"

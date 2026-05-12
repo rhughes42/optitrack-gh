@@ -33,6 +33,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <OutputPath>bin\</OutputPath>
@@ -42,7 +43,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NatNetML">
-      <HintPath>.\NatNetML.dll</HintPath>
+      <HintPath>..\..\lib\NatNet\NatNetML.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -72,7 +73,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Icons\Tracker.png" />
-    <None Include="NatNetLib.lib" />
+    <Content Include="..\..\lib\NatNet\NatNetLib.lib">
+      <Link>NatNetLib.lib</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Icons.resx">
@@ -95,9 +99,17 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="NatNetLib.dll" />
-    <Content Include="NatNetML.dll" />
-    <Content Include="NatNetML.xml" />
+    <Content Include="..\..\lib\NatNet\NatNetLib.dll">
+      <Link>NatNetLib.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\lib\NatNet\NatNetML.dll">
+      <Link>NatNetML.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\lib\NatNet\NatNetML.xml">
+      <Link>NatNetML.xml</Link>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
@@ -110,8 +122,8 @@
   <PropertyGroup>
     <PostBuildEvent>
       Copy "$(TargetPath)" "$(TargetDir)$(ProjectName).gha"
-      Erase "$(TargetDir)$(ProjectName).dll
-      Erase "$(TargetDir)$(ProjectName).pdb""
+      Erase "$(TargetDir)$(ProjectName).dll"
+      Erase "$(TargetDir)$(ProjectName).pdb"
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
