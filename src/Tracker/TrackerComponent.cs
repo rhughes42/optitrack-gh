@@ -433,11 +433,13 @@ namespace Tracker {
 				return;
 			}
 
-			if ( DateTime.UtcNow.Subtract( connectionStartedUtc ).TotalSeconds > NoFrameWarningThresholdSeconds && !noFrameWarningReported ) {
+			if ( DateTime.UtcNow.Subtract( connectionStartedUtc ).TotalSeconds > NoFrameWarningThresholdSeconds ) {
 				string warning = "Connected, but no NatNet frame has been received. Check Motive broadcasting, firewall, IP addresses, ports, and multicast/unicast settings.";
 				warnings.Add( warning );
-				AddRuntimeMessage( GH_RuntimeMessageLevel.Warning, warning );
-				noFrameWarningReported = true;
+				if ( !noFrameWarningReported ) {
+					AddRuntimeMessage( GH_RuntimeMessageLevel.Warning, warning );
+					noFrameWarningReported = true;
+				}
 			}
 		}
 
