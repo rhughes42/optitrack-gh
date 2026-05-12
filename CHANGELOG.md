@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.3.0
+
+- Added SDK-independent OptiTrack core models and `IOptiTrackClient`.
+- Added a NatNet-backed adapter that isolates direct `NatNetML` usage under `OptiTrack.NatNet`.
+- Updated the Grasshopper component to consume internal domain models instead of raw NatNet SDK frame types.
+- Added a default no-op telemetry abstraction and sanitizer for future privacy-aware error/performance reporting.
+- Added developer and architecture documentation, including a Mermaid diagram of the Motive-to-Grasshopper flow.
+- Updated assembly metadata and documentation version references to `1.3.0`.
+
 ## v1.2.0
 
 - Reorganized the repository around `src/`, `lib/`, `docs/`, and `examples/`.

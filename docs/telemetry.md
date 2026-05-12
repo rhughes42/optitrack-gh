@@ -22,8 +22,21 @@ Recognized placeholder settings:
 
 - `SENTRY_DSN` - optional DSN; telemetry remains disabled when absent or empty.
 - `SENTRY_ENVIRONMENT` - optional environment name such as `development`, `lab`, or `production`.
-- `SENTRY_RELEASE` - optional release identifier, for example `tracker@1.2.0`.
+- `SENTRY_RELEASE` - optional release identifier, for example `tracker@1.3.0`.
 - `SENTRY_TRACES_SAMPLE_RATE` - optional numeric sample rate for aggregate performance telemetry.
+
+## Current v1.3.0 Boundary
+
+Tracker now includes an internal telemetry boundary:
+
+- `ITelemetryService`
+- `NoOpTelemetryService`
+- `TelemetryEvent`
+- `TelemetryContext`
+- `TelemetryScope`
+- `TelemetrySanitizer`
+
+The Grasshopper component and NatNet adapter use this boundary for sanitized exception and operation hooks. The default implementation is no-op, so no data leaves the process.
 
 ## Sentry Plugin Operations
 
