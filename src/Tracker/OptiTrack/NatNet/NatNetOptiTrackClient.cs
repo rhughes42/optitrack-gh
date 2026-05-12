@@ -75,7 +75,9 @@ namespace OptiTrack.NatNet {
 						NatNetClientML.ConnectParams connectParams = new NatNetClientML.ConnectParams {
 							ConnectionType = ToNatNetConnectionType( options.ConnectionType ),
 							ServerAddress = options.ServerAddress,
-							LocalAddress = options.LocalAddress
+							LocalAddress = options.LocalAddress,
+							ServerCommandPort = (ushort) options.ServerCommandPort,
+							ServerDataPort = (ushort) options.ServerDataPort
 						};
 
 						natNetClient.Connect( connectParams );
@@ -127,6 +129,8 @@ namespace OptiTrack.NatNet {
 				ConnectionInfo.HostApplication = serverDescription.HostApp;
 				ConnectionInfo.LocalAddress = options.LocalAddress;
 				ConnectionInfo.ServerAddress = options.ServerAddress;
+				ConnectionInfo.ServerCommandPort = options.ServerCommandPort;
+				ConnectionInfo.ServerDataPort = options.ServerDataPort;
 			} else {
 				statusMessages.Add( "Error: Failed to connect. Check the connection settings." );
 				statusMessages.Add( "Program terminated." );
@@ -189,7 +193,7 @@ namespace OptiTrack.NatNet {
 						FetchDataDescriptions();
 					}
 
-					frame = NatNetFrameConverter.ConvertFrame( data, rigidBodies, options, new List<string>( statusMessages ) );
+					frame = NatNetFrameConverter.ConvertFrame( data, client, rigidBodies, options, new List<string>( statusMessages ) );
 				}
 
 				EventHandler<OptiTrackFrameEventArgs> handler = FrameReceived;

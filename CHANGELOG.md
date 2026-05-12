@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.4.0
+
+- Expanded the OptiTrack Stream component inputs for connection type, NatNet command/data ports, scale factor, Y-up transform, redraw throttle, debug logging, and optional telemetry enablement.
+- Added outputs for rigid body transforms, frame number, timestamp, latency, warnings, and telemetry status while preserving the original output order.
+- Added validation and clearer Grasshopper runtime messages for invalid IPs, invalid ports, missing NatNet DLLs, no-frame-after-connect cases, and telemetry configuration state.
+- Added optional Sentry error reporting through `ITelemetryService`, disabled by default and activated only when explicitly enabled and configured.
+- Added sanitized Sentry configuration support for `SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE`, and local `tracker.telemetry.local.json`.
+- Updated setup, troubleshooting, telemetry, and Grasshopper component documentation.
+
 ## v1.3.0
 
 - Added SDK-independent OptiTrack core models and `IOptiTrackClient`.

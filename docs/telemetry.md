@@ -1,6 +1,6 @@
 # Telemetry and Error Reporting Policy
 
-Tracker must remain usable without telemetry. Error reporting is optional and disabled unless explicitly configured by the user or deployment owner.
+Tracker must remain usable without telemetry. Error reporting is optional and disabled unless explicitly enabled in Grasshopper and configured by the user or deployment owner.
 
 ## Defaults
 
@@ -12,7 +12,7 @@ Tracker must remain usable without telemetry. Error reporting is optional and di
 
 ## Future Sentry Configuration
 
-If Sentry support is added later, configuration should come from one of these sources:
+Tracker v1.4.0 includes optional Sentry support through the official Sentry .NET SDK. Configuration should come from one of these sources:
 
 - Environment variables
 - A local config file excluded from source control
@@ -22,12 +22,23 @@ Recognized placeholder settings:
 
 - `SENTRY_DSN` - optional DSN; telemetry remains disabled when absent or empty.
 - `SENTRY_ENVIRONMENT` - optional environment name such as `development`, `lab`, or `production`.
-- `SENTRY_RELEASE` - optional release identifier, for example `tracker@1.3.0`.
+- `SENTRY_RELEASE` - optional release identifier, for example `tracker@1.4.0`.
 - `SENTRY_TRACES_SAMPLE_RATE` - optional numeric sample rate for aggregate performance telemetry.
 
-## Current v1.3.0 Boundary
+A local config file named `tracker.telemetry.local.json` may be placed next to `Tracker.gha`. It is ignored by git and may contain:
 
-Tracker now includes an internal telemetry boundary:
+```json
+{
+  "SENTRY_DSN": "",
+  "SENTRY_ENVIRONMENT": "local",
+  "SENTRY_RELEASE": "tracker@1.4.0",
+  "SENTRY_TRACES_SAMPLE_RATE": "0"
+}
+```
+
+## Current v1.4.0 Boundary
+
+Tracker includes an internal telemetry boundary:
 
 - `ITelemetryService`
 - `NoOpTelemetryService`
@@ -36,7 +47,9 @@ Tracker now includes an internal telemetry boundary:
 - `TelemetryScope`
 - `TelemetrySanitizer`
 
-The Grasshopper component and NatNet adapter use this boundary for sanitized exception and operation hooks. The default implementation is no-op, so no data leaves the process.
+The Grasshopper component and NatNet adapter use this boundary for sanitized exception and operation hooks. The default implementation is no-op, so no data leaves the process. `SentryTelemetryService` is used only when the component telemetry input is enabled and a valid DSN is present.
+
+Sentry exceptions are reported with sanitized exception type/message data rather than raw capture payloads. Context tags and metrics pass through `TelemetrySanitizer` before reporting.
 
 ## Sentry Plugin Operations
 
@@ -81,4 +94,4 @@ Do not attach frame payloads or per-marker/per-rigid-body values.
 
 ## Disable Completely
 
-Telemetry must be disabled when `SENTRY_DSN` is missing, empty, or explicitly disabled by a local setting. Users should also be able to remove any local telemetry config file or clear related environment variables to disable reporting completely.
+Telemetry is disabled when `Enable Telemetry` is false, when `SENTRY_DSN` is missing or empty, or when local configuration is invalid. Users can remove `tracker.telemetry.local.json`, clear related environment variables, or set the component input to false to disable reporting completely.
