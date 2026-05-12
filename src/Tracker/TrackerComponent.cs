@@ -195,7 +195,7 @@ namespace Tracker {
 			}
 
 			telemetry = SentryTelemetryService.Create( enableTelemetry );
-			bool wasConnected = connectionConfirmed || (optiTrackClient != null && optiTrackClient.IsConnected);
+			bool wasConnected = optiTrackClient != null && optiTrackClient.IsConnected;
 			if ( wasConnected ) {
 				DisconnectClient();
 				Log.Add( "Telemetry setting changed. Reconnecting to apply updated telemetry." );
@@ -430,7 +430,6 @@ namespace Tracker {
 
 		private void ReportNoFrameWarning() {
 			if ( currentFrame != null || connectionStartedUtc == DateTime.MinValue ) {
-				noFrameWarningReported = false;
 				return;
 			}
 
