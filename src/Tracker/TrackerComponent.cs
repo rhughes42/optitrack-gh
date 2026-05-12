@@ -24,10 +24,10 @@ namespace Tracker {
 		private static OptiTrackFrame currentFrame;
 		private static DateTime connectionStartedUtc = DateTime.MinValue;
 		private static DateTime lastFrameUtc = DateTime.MinValue;
+		private static bool noFrameWarningReported;
 		private static bool handlersAttached;
 		private static bool connectionConfirmed;
 		private static bool telemetryEnabled;
-		private static int counter;
 
 		private static bool RigidBody;
 		private static bool Skeleton;
@@ -62,7 +62,7 @@ namespace Tracker {
 			pManager.AddTextParameter( "Connection Type", "Type", "NatNet connection type: Multicast or Unicast.", GH_ParamAccess.item, "Multicast" );
 			pManager.AddIntegerParameter( "Command Port", "Cmd Port", "NatNet server command port.", GH_ParamAccess.item, 1510 );
 			pManager.AddIntegerParameter( "Data Port", "Data Port", "NatNet server data port.", GH_ParamAccess.item, 1511 );
-			pManager.AddNumberParameter( "Scale Factor", "Scale", "Additional scale factor applied to rigid body planes.", GH_ParamAccess.item, 1.0 );
+			pManager.AddNumberParameter( "Scale Factor", "Scale", "Additional scale factor applied to marker points and rigid body planes.", GH_ParamAccess.item, 1.0 );
 			pManager.AddBooleanParameter( "Y Up", "Y Up", "Apply the existing Y-up coordinate adjustment.", GH_ParamAccess.item, false );
 			pManager.AddIntegerParameter( "Redraw Throttle", "Throttle", "Process every Nth NatNet frame. Use 1 for every frame.", GH_ParamAccess.item, 4 );
 			pManager.AddBooleanParameter( "Debug Logging", "Debug", "Show additional component runtime remarks.", GH_ParamAccess.item, false );
@@ -116,7 +116,9 @@ namespace Tracker {
 			DA.GetData( 11, ref enableTelemetry );
 
 			warnings.Clear();
-			yUp = yUpInput;
+			if ( Params.Input[ 8 ].SourceCount > 0 ) {
+				yUp = yUpInput;
+			}
 			ConfigureTelemetry( enableTelemetry );
 
 			OptiTrackConnectionType connectionType = ParseConnectionType( connectionTypeText );
@@ -135,17 +137,14 @@ namespace Tracker {
 			if ( reset ) {
 				ClearFrameState();
 				DisconnectClient();
-				counter = 0;
 				AddRuntimeMessage( GH_RuntimeMessageLevel.Remark, "Tracker client reset." );
 			}
 
-			if ( connect && counter == 0 ) {
-				ConnectClient( localIP, serverIP, connectionType, commandPort, dataPort, scaleFactor, redrawThrottle, debugLogging );
-				counter++;
+			if ( connect && !connectionConfirmed ) {
+				ConnectClient( localIP, serverIP, connectionType, commandPort, dataPort, redrawThrottle );
 			} else if ( connect && connectionConfirmed ) {
 				ProcessFrameData( currentFrame, scaleFactor );
 				ReportNoFrameWarning();
-				counter++;
 			} else if ( !connect ) {
 				DisconnectClient();
 				ClearFrameState();
@@ -157,7 +156,9 @@ namespace Tracker {
 			}
 
 			SetOutputs( DA );
-			ExpireSolution( true );
+			if ( connect ) {
+				ExpireSolution( true );
+			}
 		}
 
 		private void SetOutputs( IGH_DataAccess DA ) {
@@ -191,9 +192,16 @@ namespace Tracker {
 			}
 
 			telemetry = SentryTelemetryService.Create( enableTelemetry );
-			if ( !connectionConfirmed ) {
-				ResetClient();
+			bool wasConnected = connectionConfirmed || (optiTrackClient != null && optiTrackClient.IsConnected);
+			if ( wasConnected ) {
+				DisconnectClient();
+				Log.Add( "Telemetry setting changed. Reconnecting to apply updated telemetry." );
+				connectionStartedUtc = DateTime.UtcNow;
+				lastFrameUtc = DateTime.MinValue;
+				currentFrame = null;
 			}
+
+			ResetClient();
 		}
 
 		private static void ResetClient() {
@@ -206,7 +214,7 @@ namespace Tracker {
 			handlersAttached = false;
 		}
 
-		private static void ConnectClient( string localIP, string serverIP, OptiTrackConnectionType connectionType, int commandPort, int dataPort, double scaleFactor, int redrawThrottle, bool debugLogging ) {
+		private static void ConnectClient( string localIP, string serverIP, OptiTrackConnectionType connectionType, int commandPort, int dataPort, int redrawThrottle ) {
 			EnsureClientHandlers();
 			Log.Clear();
 			Log.Add( "NatNet managed client application starting..." );
@@ -215,6 +223,7 @@ namespace Tracker {
 			Log.Add( "Attempting connection to Motive NatNet server..." );
 			connectionStartedUtc = DateTime.UtcNow;
 			lastFrameUtc = DateTime.MinValue;
+			noFrameWarningReported = false;
 
 			OptiTrackConnectionOptions options = new OptiTrackConnectionOptions {
 				LocalAddress = localIP,
@@ -226,10 +235,7 @@ namespace Tracker {
 				IncludeRigidBodies = RigidBody,
 				IncludeSkeletons = Skeleton,
 				IncludeForcePlates = ForcePlate,
-				FrameDivisor = redrawThrottle,
-				ScaleFactor = scaleFactor,
-				YUp = yUp,
-				DebugLogging = debugLogging
+				FrameDivisor = redrawThrottle
 			};
 
 			try {
@@ -277,6 +283,7 @@ namespace Tracker {
 		private static void OnFrameReceived( object sender, OptiTrackFrameEventArgs e ) {
 			currentFrame = e.Frame;
 			lastFrameUtc = DateTime.UtcNow;
+			noFrameWarningReported = false;
 		}
 
 		private static void OnConnectionChanged( object sender, OptiTrackConnectionEventArgs e ) {
@@ -294,6 +301,7 @@ namespace Tracker {
 			rBodyPlanes.Clear();
 			rBodyTransforms.Clear();
 			warnings.Clear();
+			noFrameWarningReported = false;
 		}
 
 		private void ProcessFrameData( OptiTrackFrame frame, double scaleFactor ) {
@@ -419,15 +427,15 @@ namespace Tracker {
 
 		private void ReportNoFrameWarning() {
 			if ( currentFrame != null || connectionStartedUtc == DateTime.MinValue ) {
+				noFrameWarningReported = false;
 				return;
 			}
 
-			if ( DateTime.UtcNow.Subtract( connectionStartedUtc ).TotalSeconds > 5 ) {
+			if ( DateTime.UtcNow.Subtract( connectionStartedUtc ).TotalSeconds > 5 && !noFrameWarningReported ) {
 				string warning = "Connected, but no NatNet frame has been received. Check Motive broadcasting, firewall, IP addresses, ports, and multicast/unicast settings.";
-				if ( !warnings.Contains( warning ) ) {
-					warnings.Add( warning );
-					AddRuntimeMessage( GH_RuntimeMessageLevel.Warning, warning );
-				}
+				warnings.Add( warning );
+				AddRuntimeMessage( GH_RuntimeMessageLevel.Warning, warning );
+				noFrameWarningReported = true;
 			}
 		}
 
@@ -437,7 +445,14 @@ namespace Tracker {
 
 		private static bool NatNetDependenciesPresent() {
 			string assemblyLocation = typeof( TrackerComponent ).Assembly.Location;
-			string baseDirectory = string.IsNullOrWhiteSpace( assemblyLocation ) ? AppDomain.CurrentDomain.BaseDirectory : Path.GetDirectoryName( assemblyLocation );
+			string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+			if ( !string.IsNullOrWhiteSpace( assemblyLocation ) ) {
+				string assemblyDirectory = Path.GetDirectoryName( assemblyLocation );
+				if ( !string.IsNullOrWhiteSpace( assemblyDirectory ) ) {
+					baseDirectory = assemblyDirectory;
+				}
+			}
+
 			return File.Exists( Path.Combine( baseDirectory, "NatNetML.dll" ) ) && File.Exists( Path.Combine( baseDirectory, "NatNetLib.dll" ) );
 		}
 

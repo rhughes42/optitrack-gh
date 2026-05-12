@@ -33,7 +33,16 @@ namespace OptiTrack.Telemetry {
 		}
 
 		private static void LoadLocalFile( SentryTelemetryOptions options ) {
-			string path = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "tracker.telemetry.local.json" );
+			string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+			string assemblyLocation = typeof( SentryTelemetryOptions ).Assembly.Location;
+			if ( !string.IsNullOrWhiteSpace( assemblyLocation ) ) {
+				string assemblyDirectory = Path.GetDirectoryName( assemblyLocation );
+				if ( !string.IsNullOrWhiteSpace( assemblyDirectory ) ) {
+					baseDirectory = assemblyDirectory;
+				}
+			}
+
+			string path = Path.Combine( baseDirectory, "tracker.telemetry.local.json" );
 			if ( !File.Exists( path ) ) {
 				return;
 			}

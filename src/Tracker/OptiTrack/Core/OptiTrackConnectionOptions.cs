@@ -26,11 +26,5 @@ namespace OptiTrack.Core {
 		public bool IncludeForcePlates { get; set; }
 
 		public int FrameDivisor { get; set; } = 4;
-
-		public double ScaleFactor { get; set; } = 1.0;
-
-		public bool YUp { get; set; }
-
-		public bool DebugLogging { get; set; }
 	}
 }
