@@ -1,50 +1,46 @@
 # Developer Guide
 
-## Project Layout
+## Repository Areas
 
-- `src/Tracker` contains the Grasshopper plugin project.
-- `src/Tracker/OptiTrack/Core` contains SDK-independent domain models and client interfaces.
-- `src/Tracker/OptiTrack/NatNet` contains the NatNetML-backed adapter and conversion helpers.
-- `src/Tracker/OptiTrack/Telemetry` contains the default-disabled telemetry abstraction.
-- `lib/NatNet` contains the current bundled NatNet SDK 4.0 files.
+- `src/Tracker`: plugin code and `.csproj`
+- `src/Tracker/OptiTrack/Core`: transport-neutral models and interfaces
+- `src/Tracker/OptiTrack/NatNet`: NatNet adapter layer
+- `src/Tracker/OptiTrack/Recording`: JSON recording and replay adapter
+- `src/Tracker/OptiTrack/Telemetry`: optional telemetry boundary
+- `src/Tracker/Components`: composable Grasshopper components
 
-## NatNet Boundary
+## Coding Boundaries
 
-Grasshopper components should depend on `OptiTrack.Core` models and interfaces instead of `NatNetML` types. Keep direct usage of `NatNetClientML`, `FrameOfMocapData`, `DataDescriptor`, and related SDK classes inside `OptiTrack.NatNet`.
+- Keep direct `NatNetML` references inside `OptiTrack.NatNet`.
+- Keep replay/file format logic inside `OptiTrack.Recording`.
+- Keep RhinoCommon/Grasshopper-specific logic in component or tracker UI layers.
+- Keep telemetry behind `ITelemetryService`.
 
-The current adapter is `NatNetOptiTrackClient`, which implements `IOptiTrackClient`.
+## Extension Guidelines
 
-## Domain Models
+1. Prefer adding small components over expanding one large component.
+2. Reuse `OptiTrackFrame` and related models across live/replay paths.
+3. Keep coordinate conversion logic centralized in `OptiTrackGeometryConverter`.
+4. Add docs/examples with feature changes.
+5. Preserve backward-compatible input/output ordering when extending existing components.
 
-Use these models when passing capture data across internal boundaries:
+## Telemetry Development Rules
 
-- `OptiTrackFrame`
-- `OptiTrackMarker`
-- `OptiTrackRigidBody`
-- `OptiTrackSkeleton`
-- `OptiTrackConnectionOptions`
-- `OptiTrackConnectionInfo`
-- `OptiTrackConnectionStatus`
-- `OptiTrackFrameEventArgs`
-- `OptiTrackConnectionEventArgs`
+- Telemetry is opt-in and disabled by default.
+- Never emit raw motion payloads.
+- Only emit aggregate counts, durations, and high-level error categories.
+- Sanitize tags/context with `TelemetrySanitizer`.
 
-These models may contain motion-capture values for local Grasshopper output. They must not be serialized into telemetry payloads.
+## Build and Validation
 
-## Telemetry
+- Build notes: [build.md](build.md)
+- Runtime validation should cover:
+  - Live connection
+  - Replay workflow
+  - Geometry conversion chain
+  - Telemetry-off default behavior
 
-Telemetry is represented by `ITelemetryService` and defaults to `NoOpTelemetryService`. `SentryTelemetryService` is available for optional sanitized reporting, but it must remain disabled unless the component enables telemetry and a valid DSN is configured.
+## Release and Contribution
 
-Only send coarse operational fields to telemetry in future integrations. Never send marker coordinates, rigid body names, raw frame payloads, IP addresses, file paths, usernames, machine names, or Rhino document names.
-
-## Conversion Helpers
-
-`NatNetFrameConverter` performs the SDK-to-domain conversion. Keep conversion behavior small and testable. If a test project is added later, cover:
-
-- NatNet frame metadata maps to `OptiTrackFrame`.
-- Marker IDs map to marker labels without sending coordinates to telemetry.
-- Rigid body position/quaternion values map to `OptiTrackRigidBody`.
-- Missing or untracked rigid bodies do not create Grasshopper planes.
-
-## Build
-
-Use the local build command in [build.md](build.md). Rhino and Motive integration still require manual validation on a machine with the relevant runtime dependencies.
+- Release workflow: [release-process.md](release-process.md)
+- Contribution guide: `../CONTRIBUTING.md`

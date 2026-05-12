@@ -77,3 +77,10 @@ These components support offline testing without Motive.
 | `Inspect Recording Metadata` | `Tracker > Recording` | Reads format version, source, units, frame count, and duration. |
 
 Replay uses the same internal `OptiTrackFrame` domain model as live capture. Telemetry is optional and only reports aggregate counters/durations and error categories.
+
+### Recording/Replay I/O Notes
+
+- `Record OptiTrack Stream` expects a frame object and can save JSON with metadata (`FormatVersion`, `FrameCount`, `Units`, `Source`).
+- `Load OptiTrack Recording` loads JSON into a replayable object.
+- `Replay OptiTrack Recording` supports play/pause/loop/speed/scrub and outputs a frame object compatible with downstream geometry components.
+- `Inspect Recording Metadata` returns non-sensitive metadata only.

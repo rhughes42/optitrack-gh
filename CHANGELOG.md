@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.7.0
+
+- Added a full documentation index and new getting-started, networking, release-process, and optional Sentry setup guides.
+- Expanded architecture, developer, telemetry, recording/replay, and component documentation with clearer workflows and privacy boundaries.
+- Added and standardized six example walkthroughs covering live capture, geometry conversion, robotics alignment, structural tracking, and record/replay usage.
+- Added contribution guidance and GitHub issue templates for bugs, features, compatibility, and telemetry/privacy concerns.
+- Updated root README navigation for new users and public project usability.
+
 ## v1.6.0
 
 - Added an `OptiTrack.Recording` layer with JSON recording models, serialization helpers, a recording session utility, and a replay `IOptiTrackClient` implementation.

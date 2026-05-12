@@ -1,16 +1,41 @@
 # Example 02: Rigid Body Plane Conversion
 
-Goal: convert a rigid body pose into a Rhino plane for downstream geometry/robotics use.
+## Purpose
 
-1. Add `Rigid Body To Plane`.
-2. Connect:
-   - `Origin`: rigid body position point
-   - `Quaternion WXYZ`: list of four values
-3. Set `Scale Factor` to `1.0` for meters or `1000.0` for millimetres.
-4. Toggle `Y Up` if your downstream coordinate convention expects it.
-5. Use output `Plane` for toolpath alignment, fixture checks, or transform derivation.
+Convert a rigid body pose into a Rhino `Plane` for fixture alignment, robot target definition, or transform chaining.
 
-Telemetry:
+## Required Hardware/Software
 
-- Keep `Enable Telemetry` false by default.
-- When enabled/configured, only aggregate operation duration and count metadata is reported.
+- Rhino 8 + Grasshopper
+- Tracker plugin
+- Either live stream data or replay recording
+
+## Component List
+
+- `OptiTrack Stream` or `Replay OptiTrack Recording`
+- `Rigid Body To Plane`
+
+## Step-by-Step Setup
+
+1. Obtain pose values (`origin`, `quaternion`) from live or replay workflows.
+2. Add `Rigid Body To Plane`.
+3. Connect `Origin` and `Quaternion WXYZ`.
+4. Set `Scale Factor`:
+   - `1.0` for meter workflow
+   - `1000.0` for millimeter workflow
+5. Toggle `Y Up` only when your downstream graph expects that remap.
+
+## Expected Outputs
+
+- Valid `Plane` aligned with rigid body orientation
+- Stable orientation under consistent input quaternions
+
+## Troubleshooting Notes
+
+- Invalid quaternion length: ensure exactly four numbers in `W,X,Y,Z` order.
+- Unexpected orientation: verify quaternion convention and Y-up expectations.
+- Wrong scale: confirm unit convention near conversion stage.
+
+## Telemetry Notes
+
+If enabled, telemetry may report conversion duration and operation counts only. Pose coordinates and names must not be reported.

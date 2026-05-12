@@ -12,7 +12,7 @@ Tracker must remain usable without telemetry. Error reporting is optional and di
 
 ## Future Sentry Configuration
 
-Tracker v1.6.0 includes optional Sentry support through the official Sentry .NET SDK. Configuration should come from one of these sources:
+Tracker v1.7.0 documentation includes optional Sentry support through the official Sentry .NET SDK. Configuration should come from one of these sources:
 
 - Environment variables
 - A local config file excluded from source control
@@ -36,7 +36,7 @@ A local config file named `tracker.telemetry.local.json` may be placed next to `
 }
 ```
 
-## Current v1.6.0 Boundary
+## Current v1.7.0 Boundary
 
 Tracker includes an internal telemetry boundary:
 
@@ -48,6 +48,8 @@ Tracker includes an internal telemetry boundary:
 - `TelemetrySanitizer`
 
 The Grasshopper component and NatNet adapter use this boundary for sanitized exception and operation hooks. The default implementation is no-op, so no data leaves the process. `SentryTelemetryService` is used only when the component telemetry input is enabled and a valid DSN is present.
+
+For setup steps, see [sentry.md](sentry.md).
 
 Sentry exceptions are reported with sanitized exception type/message data rather than raw capture payloads. Context tags and metrics pass through `TelemetrySanitizer` before reporting.
 
@@ -110,7 +112,7 @@ Performance monitoring, if enabled, should use aggregate spans and counters only
 
 Do not attach frame payloads or per-marker/per-rigid-body values.
 
-## Recording and Replay Rules (v1.6.0)
+## Recording and Replay Rules (v1.7.0)
 
 Allowed recording/replay telemetry:
 

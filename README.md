@@ -4,6 +4,18 @@ Tracker is a Grasshopper plugin for receiving real-time OptiTrack motion-capture
 
 The plugin exposes an **OptiTrack Stream** live-capture component plus reusable geometry/calibration components for frame conversion, filtering, smoothing, transform workflows, and offline recording/replay.
 
+## Documentation
+
+- [Getting Started](docs/getting-started.md)
+- [Installation](docs/setup.md)
+- [Compatibility](docs/compatibility.md)
+- [Examples](examples/README.md)
+- [Developer Guide](docs/developer-guide.md)
+- [Troubleshooting](docs/troubleshooting.md)
+- [Telemetry Policy](docs/telemetry.md)
+- [Optional Sentry Setup](docs/sentry.md)
+- [Documentation Index](docs/README.md)
+
 ## Requirements
 
 - Rhino 8 with Grasshopper
@@ -77,7 +89,7 @@ Maintainers may use the Codex Sentry plugin for read-only issue review, but that
 
 ## Version
 
-Current modernization target: `v1.6.0`.
+Current modernization target: `v1.7.0`.
 
 ## Contributors
 

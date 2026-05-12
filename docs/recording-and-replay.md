@@ -1,6 +1,6 @@
 # Recording and Replay
 
-Tracker v1.6.0 adds offline recording and replay so geometry and calibration workflows can be developed without a live Motive session.
+Tracker v1.7.0 documents offline recording and replay so geometry and calibration workflows can be developed without a live Motive session.
 
 ## Components
 
@@ -24,6 +24,8 @@ Recording files use a structured JSON container:
 - `Frames` (array of `OptiTrackFrame` domain-model payloads)
 
 See [sample-rigid-body-recording.json](/d:/Repos/Archive/optitrack-gh/examples/data/sample-rigid-body-recording.json).
+
+JSON is the primary supported format for full-fidelity replay. CSV export/import may be added later for simplified marker/rigid-body tabular workflows.
 
 ## Development Workflow Without Motive
 

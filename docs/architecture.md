@@ -1,32 +1,42 @@
 # Architecture
 
-Tracker separates Grasshopper UI code from NatNet SDK-specific code so future NatNet upgrades, tests, and telemetry work can happen behind stable internal boundaries.
+Tracker keeps NatNet SDK usage isolated and routes both live capture and replay through shared domain models.
+
+## Motive to Grasshopper Data Flow
 
 ```mermaid
 flowchart LR
-  Motive[OptiTrack Motive<br/>NatNet broadcast] --> Adapter[NatNet adapter<br/>OptiTrack.NatNet]
-  Recording[Recording JSON<br/>examples/data or user files] --> Replay[Replay adapter<br/>OptiTrack.Recording]
-  Adapter --> Core[OptiTrack core models<br/>OptiTrack.Core]
-  Replay --> Core
-  Adapter --> Telemetry[Telemetry abstraction<br/>NoOp by default]
-  Replay --> Telemetry
-  Core --> Grasshopper[Grasshopper components<br/>Tracker]
-  Grasshopper --> Rhino[Rhino geometry outputs<br/>points, labels, planes]
-  Grasshopper --> Telemetry
+  M[Motive NatNet Broadcast] --> N[NatNetOptiTrackClient]
+  N --> C[OptiTrack.Core Models]
+  C --> G[Grasshopper Components]
+  G --> R[Rhino Geometry Outputs]
+```
+
+## Live vs Replay Paths
+
+```mermaid
+flowchart TD
+  L[Live: Motive/NatNet] --> A[OptiTrack.NatNet Adapter]
+  J[Replay: Recording JSON] --> P[OptiTrackReplayClient]
+  A --> C[OptiTrack.Core OptiTrackFrame]
+  P --> C
+  C --> GH[Tracker Components]
 ```
 
 ## Boundaries
 
-`OptiTrack.NatNet` is the only layer that should reference `NatNetML` classes. It owns the NatNet client, data descriptors, frame event callback, and conversion into SDK-independent models.
+- `OptiTrack.NatNet`: only layer with direct `NatNetML` usage.
+- `OptiTrack.Recording`: recording schema, serializer, and replay adapter.
+- `OptiTrack.Core`: transport-neutral models and `IOptiTrackClient`.
+- `Tracker.Components` and `TrackerComponent`: Grasshopper UX and Rhino geometry conversion.
+- `OptiTrack.Telemetry`: optional telemetry interface and sanitizer boundary.
 
-`OptiTrack.Core` contains internal domain models and `IOptiTrackClient`. This layer does not know about Rhino, Grasshopper, or Sentry.
+## Why This Shape
 
-`OptiTrack.Recording` adds a JSON recording container, replay client (`OptiTrackReplayClient`), and recording session utilities. Replay reuses the same `OptiTrackFrame` models as live NatNet capture.
+- Live and replay both produce `OptiTrackFrame`, so downstream geometry/calibration chains stay reusable.
+- NatNet upgrades are localized to one adapter.
+- Telemetry implementation can change without changing component business logic.
 
-`TrackerComponent` consumes `IOptiTrackClient`, receives `OptiTrackFrame` instances, and converts them into Grasshopper outputs. Rhino geometry creation remains in the Grasshopper layer.
+## Privacy Boundary
 
-`OptiTrack.Telemetry` defines the reporting boundary. The default implementation is `NoOpTelemetryService`; `SentryTelemetryService` is activated only when the Grasshopper component enables telemetry and a valid local Sentry configuration exists.
-
-## Privacy
-
-The abstraction does not make motion-capture data safe for telemetry. Domain models can contain marker coordinates and rigid body names for local component outputs. Telemetry integrations must use `TelemetrySanitizer` and must avoid raw frame data, marker coordinates, rigid body names, file paths, IP addresses, usernames, machine names, and Rhino document names.
+Domain models include motion data for local computation. Telemetry must only receive sanitized aggregate metadata and must never include marker coordinates, rigid body names, raw frames, paths, IPs, usernames, or Rhino document identifiers.

@@ -24,6 +24,16 @@ Tracker components assume NatNet positions are reported in meters in the Motive 
 - Use `Apply OptiTrack Transform` to map geometry into a world, robot, or fixture frame.
 - Keep calibration transforms explicit in the graph so downstream robotics logic can be audited.
 
+## Coordinate Transform Chain
+
+```mermaid
+flowchart LR
+  A[NatNet Pose / Marker] --> B[Scale Factor]
+  B --> C[Axis Remap / Y-Up Option]
+  C --> D[World or Calibration Transform]
+  D --> E[Rhino Plane / Transform / Point3d]
+```
+
 ## Unit Safety Checklist
 
 1. Confirm Motive export unit assumptions (usually meters in NatNet streams).

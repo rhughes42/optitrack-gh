@@ -1,0 +1,16 @@
+# Documentation Index
+
+- [Getting Started](getting-started.md)
+- [Setup and Installation](setup.md)
+- [Compatibility Matrix](compatibility.md)
+- [Grasshopper Components](grasshopper-components.md)
+- [OptiTrack Networking](optitrack-networking.md)
+- [Coordinate Systems](coordinate-systems.md)
+- [Recording and Replay](recording-and-replay.md)
+- [Architecture](architecture.md)
+- [Developer Guide](developer-guide.md)
+- [Build Notes](build.md)
+- [Troubleshooting](troubleshooting.md)
+- [Telemetry Policy](telemetry.md)
+- [Sentry Setup (Optional)](sentry.md)
+- [Release Process](release-process.md)
