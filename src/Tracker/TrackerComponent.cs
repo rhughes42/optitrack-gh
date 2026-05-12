@@ -19,6 +19,9 @@ namespace Tracker {
 	/// The main tracker component.
 	/// </summary>
 	public class TrackerComponent : GH_Component {
+		private const int YUpInputIndex = 8;
+		private const double NoFrameWarningThresholdSeconds = 5.0;
+
 		private static ITelemetryService telemetry = new NoOpTelemetryService();
 		private static IOptiTrackClient optiTrackClient = CreateClient( telemetry );
 		private static OptiTrackFrame currentFrame;
@@ -116,7 +119,7 @@ namespace Tracker {
 			DA.GetData( 11, ref enableTelemetry );
 
 			warnings.Clear();
-			if ( Params.Input[ 8 ].SourceCount > 0 ) {
+			if ( Params.Input[ YUpInputIndex ].SourceCount > 0 ) {
 				yUp = yUpInput;
 			}
 			ConfigureTelemetry( enableTelemetry );
@@ -431,7 +434,7 @@ namespace Tracker {
 				return;
 			}
 
-			if ( DateTime.UtcNow.Subtract( connectionStartedUtc ).TotalSeconds > 5 && !noFrameWarningReported ) {
+			if ( DateTime.UtcNow.Subtract( connectionStartedUtc ).TotalSeconds > NoFrameWarningThresholdSeconds && !noFrameWarningReported ) {
 				string warning = "Connected, but no NatNet frame has been received. Check Motive broadcasting, firewall, IP addresses, ports, and multicast/unicast settings.";
 				warnings.Add( warning );
 				AddRuntimeMessage( GH_RuntimeMessageLevel.Warning, warning );
