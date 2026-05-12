@@ -1,0 +1,58 @@
+{
+  "FormatVersion": "1.0",
+  "Metadata": {
+    "PluginVersion": "1.6.0",
+    "RecordedUtc": "2026-05-12T12:00:00Z",
+    "Units": "meters",
+    "Source": "synthetic",
+    "FrameCount": 3,
+    "DurationSeconds": 0.0333333
+  },
+  "Frames": [
+    {
+      "FrameNumber": 1,
+      "TimestampSeconds": 0.0,
+      "LatencySeconds": 0.0,
+      "IsRecording": false,
+      "AssetsChanged": false,
+      "Markers": [
+        { "Id": 1, "Label": "M1", "X": 0.1, "Y": 0.2, "Z": 0.3 }
+      ],
+      "RigidBodies": [
+        { "Id": 1, "Name": "RB_A", "IsTracked": true, "X": 0.0, "Y": 0.0, "Z": 0.0, "Qx": 0.0, "Qy": 0.0, "Qz": 0.0, "Qw": 1.0 }
+      ],
+      "Skeletons": [],
+      "StatusMessages": [ "Synthetic frame 1" ]
+    },
+    {
+      "FrameNumber": 2,
+      "TimestampSeconds": 0.0166667,
+      "LatencySeconds": 0.0,
+      "IsRecording": false,
+      "AssetsChanged": false,
+      "Markers": [
+        { "Id": 1, "Label": "M1", "X": 0.11, "Y": 0.2, "Z": 0.31 }
+      ],
+      "RigidBodies": [
+        { "Id": 1, "Name": "RB_A", "IsTracked": true, "X": 0.01, "Y": 0.0, "Z": 0.0, "Qx": 0.0, "Qy": 0.0, "Qz": 0.0, "Qw": 1.0 }
+      ],
+      "Skeletons": [],
+      "StatusMessages": [ "Synthetic frame 2" ]
+    },
+    {
+      "FrameNumber": 3,
+      "TimestampSeconds": 0.0333333,
+      "LatencySeconds": 0.0,
+      "IsRecording": false,
+      "AssetsChanged": false,
+      "Markers": [
+        { "Id": 1, "Label": "M1", "X": 0.12, "Y": 0.2, "Z": 0.32 }
+      ],
+      "RigidBodies": [
+        { "Id": 1, "Name": "RB_A", "IsTracked": true, "X": 0.02, "Y": 0.0, "Z": 0.0, "Qx": 0.0, "Qy": 0.0, "Qz": 0.0, "Qw": 1.0 }
+      ],
+      "Skeletons": [],
+      "StatusMessages": [ "Synthetic frame 3" ]
+    }
+  ]
+}
