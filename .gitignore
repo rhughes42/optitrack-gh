@@ -7,6 +7,13 @@
 *.userosscache
 *.sln.docstates
 
+# Local configuration and telemetry secrets
+.env
+.env.*
+*.local.json
+*.local.config
+sentry.properties
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -21,6 +28,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+*.gha
 
 # Visual Studio 2015 cache/options directory
 .vs/
