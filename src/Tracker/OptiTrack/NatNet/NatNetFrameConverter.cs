@@ -9,7 +9,7 @@ namespace OptiTrack.NatNet {
 
 	internal static class NatNetFrameConverter {
 
-		internal static OptiTrackFrame ConvertFrame( FrameOfMocapData data, IReadOnlyList<RigidBody> rigidBodyDescriptions, OptiTrackConnectionOptions options, IReadOnlyList<string> statusMessages ) {
+		internal static OptiTrackFrame ConvertFrame( FrameOfMocapData data, NatNetClientML client, IReadOnlyList<RigidBody> rigidBodyDescriptions, OptiTrackConnectionOptions options, IReadOnlyList<string> statusMessages ) {
 			List<OptiTrackMarker> markers = new List<OptiTrackMarker>();
 			List<OptiTrackRigidBody> rigidBodies = new List<OptiTrackRigidBody>();
 
@@ -54,6 +54,8 @@ namespace OptiTrack.NatNet {
 
 			return new OptiTrackFrame {
 				FrameNumber = data.iFrame,
+				TimestampSeconds = data.fTimestamp,
+				LatencySeconds = client.SecondsSinceHostTimestamp( data.TransmitTimestamp ),
 				IsRecording = data.bRecording,
 				AssetsChanged = data.bTrackingModelsChanged,
 				Markers = markers,

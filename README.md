@@ -60,9 +60,9 @@ See [docs/setup.md](docs/setup.md) for more detail.
 
 ## Telemetry and Error Reporting
 
-Telemetry/error reporting is optional and disabled unless explicitly configured in a future integration. No Sentry DSN or project-specific telemetry setting is stored in source control.
+Telemetry/error reporting is optional and disabled unless explicitly enabled and configured. No Sentry DSN or project-specific telemetry setting is stored in source control.
 
-Future Sentry configuration, if added, should use environment variables, a local config file, or a user setting such as:
+Sentry configuration uses environment variables or a local config file such as:
 
 - `SENTRY_DSN`
 - `SENTRY_ENVIRONMENT`
@@ -75,7 +75,7 @@ Maintainers may use the Codex Sentry plugin for read-only issue review, but that
 
 ## Version
 
-Current modernization target: `v1.3.0`.
+Current modernization target: `v1.4.0`.
 
 ## Contributors
 

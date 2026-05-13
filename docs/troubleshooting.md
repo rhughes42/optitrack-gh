@@ -21,13 +21,19 @@ Confirm Motive is running, the tracking project is active, and NatNet streaming 
 
 `Local IP` should match the network adapter used by Rhino/Grasshopper. `Server IP` should match the Motive machine. The default `127.0.0.1` only works when Motive and Rhino are on the same machine and Motive is configured accordingly.
 
+Tracker now validates IP address format before connecting. A valid-looking IP can still be the wrong network adapter, so compare the component values with Motive and Windows network settings.
+
+## Wrong Command or Data Port
+
+The defaults are NatNet command port `1510` and data port `1511`. If Motive is configured differently, update the component inputs. The command and data ports must be valid TCP/UDP port numbers and should not be the same value.
+
 ## Firewall or Network Issues
 
 Windows Firewall or network security tools can block NatNet traffic. Allow Motive and Rhino through the firewall on the relevant private network. On managed networks, confirm multicast or UDP traffic is permitted.
 
 ## Multicast vs. Unicast
 
-Tracker currently uses multicast in code. If a network blocks multicast, the component may fail even when IP addresses are correct. Document the deployment network behavior before changing connection mode.
+Tracker supports multicast and unicast through the current NatNet adapter. Multicast remains the default for backwards compatibility. If a network blocks multicast, switch `Connection Type` to `Unicast` and confirm Motive is configured to support it.
 
 ## Grasshopper Plugin Does Not Load
 
@@ -42,6 +48,8 @@ Check these items:
 
 ## Telemetry Enabled or Disabled
 
-Telemetry/error reporting is disabled by default. In this version there is no runtime Sentry integration. If future builds add it, check for an explicit local setting, config file, or environment variable such as `SENTRY_DSN`. Removing that configuration must fully disable telemetry.
+Telemetry/error reporting is disabled by default. In v1.4.0 Sentry is available only when `Enable Telemetry` is `true` and `SENTRY_DSN` or `tracker.telemetry.local.json` is configured. Removing that configuration or setting `Enable Telemetry` to `false` disables reporting.
 
 Maintainers using the Codex Sentry plugin for read-only issue review should configure `SENTRY_AUTH_TOKEN` only in their local environment. That token is not required to run Tracker and must not be committed.
+
+If telemetry is enabled but not configured, the component reports telemetry as disabled and continues normally.

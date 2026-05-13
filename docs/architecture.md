@@ -20,7 +20,7 @@ flowchart LR
 
 `TrackerComponent` consumes `IOptiTrackClient`, receives `OptiTrackFrame` instances, and converts them into Grasshopper outputs. Rhino geometry creation remains in the Grasshopper layer.
 
-`OptiTrack.Telemetry` defines a future reporting boundary. The active implementation is `NoOpTelemetryService`, so telemetry calls are local no-ops unless a later release explicitly configures a transport.
+`OptiTrack.Telemetry` defines the reporting boundary. The default implementation is `NoOpTelemetryService`; `SentryTelemetryService` is activated only when the Grasshopper component enables telemetry and a valid local Sentry configuration exists.
 
 ## Privacy
 

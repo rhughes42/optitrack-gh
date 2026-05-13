@@ -10,10 +10,10 @@ Tracker is a Rhino/Grasshopper plugin for OptiTrack Motive through NatNet. This 
 | Motive version | Compatible with NatNet SDK 4.0 | TBD | Confirm against the Motive version used in deployment. |
 | NatNet SDK version | 4.0 | TBD | `NatNetML.dll` is referenced from `lib/NatNet`. |
 | .NET target framework | .NET Framework 4.8, x64 build target | Build validation pending | Required by `src/Tracker/Tracker.csproj`; x64 matches Rhino 8 and bundled NatNet runtime files. |
-| Sentry SDK version | Not currently included | N/A | Future optional integration only. |
+| Sentry SDK version | 6.5.0 | Build validated | Optional and disabled unless configured. |
 
 ## Notes
 
 - Do not assume a Motive/NatNet upgrade is compatible without testing a live stream.
 - Keep the NatNet managed DLL and native DLL together with the built `Tracker.gha`.
-- If Sentry is added later, document the exact SDK version and default disabled behavior here.
+- Sentry remains optional and default-disabled.

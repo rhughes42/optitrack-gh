@@ -37,7 +37,20 @@ The project copies bundled NatNet files from `lib/NatNet` to the build output.
 
 1. Place **OptiTrack Stream** from the Tracker category.
 2. Set `Local IP` and `Server IP`.
-3. Set `Activate` to `true`.
-4. Use the component context menu to enable rigid-body output when required.
+3. Keep `Connection Type` as `Multicast` unless the Motive/network setup requires `Unicast`.
+4. Keep NatNet ports at `1510` command and `1511` data unless Motive is configured differently.
+5. Set `Connect` to `true`.
+6. Use the component context menu to enable rigid-body output when required.
+7. Inspect `Status`, `Warnings`, `Frame Number`, and `Telemetry Status`.
 
-The plugin should not require telemetry or Sentry configuration to run.
+The plugin does not require telemetry or Sentry configuration to run.
+
+## Optional Sentry Configuration
+
+Sentry is disabled by default. To enable it for sanitized error reporting:
+
+1. Set `Enable Telemetry` to `true` on the component.
+2. Provide a DSN through `SENTRY_DSN` or a local `tracker.telemetry.local.json` file next to the plugin output.
+3. Optionally set `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, and `SENTRY_TRACES_SAMPLE_RATE`.
+
+Do not commit local telemetry config files or DSNs.

@@ -32,7 +32,7 @@ These models may contain motion-capture values for local Grasshopper output. The
 
 ## Telemetry
 
-Telemetry is represented by `ITelemetryService` and defaults to `NoOpTelemetryService`. New code may call the interface for sanitized operation boundaries, but must not add a real Sentry transport without a separate review.
+Telemetry is represented by `ITelemetryService` and defaults to `NoOpTelemetryService`. `SentryTelemetryService` is available for optional sanitized reporting, but it must remain disabled unless the component enables telemetry and a valid DSN is configured.
 
 Only send coarse operational fields to telemetry in future integrations. Never send marker coordinates, rigid body names, raw frame payloads, IP addresses, file paths, usernames, machine names, or Rhino document names.
 

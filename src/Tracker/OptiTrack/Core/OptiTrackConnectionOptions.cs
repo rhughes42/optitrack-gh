@@ -13,6 +13,10 @@ namespace OptiTrack.Core {
 
 		public OptiTrackConnectionType ConnectionType { get; set; } = OptiTrackConnectionType.Multicast;
 
+		public int ServerCommandPort { get; set; } = 1510;
+
+		public int ServerDataPort { get; set; } = 1511;
+
 		public bool IncludeMarkers { get; set; } = true;
 
 		public bool IncludeRigidBodies { get; set; }
