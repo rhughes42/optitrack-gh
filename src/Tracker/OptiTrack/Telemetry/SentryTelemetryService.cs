@@ -55,7 +55,7 @@ namespace OptiTrack.Telemetry {
 
 				SentrySdk.SetTag("plugin_version", GetPluginVersion());
 				SentrySdk.SetTag("adapter_name", ResolveAdapterName());
-				SentrySdk.SetTag("rhino_version", GetRhinoVersion());
+				SentrySdk.SetTag("rhino_major_version", GetRhinoMajorVersion());
 				SentrySdk.SetTag("sentry_sdk_version", typeof(SentrySdk).Assembly.GetName().Version?.ToString() ?? "unknown");
 
 				return new SentryTelemetryService(sentry, "active");
@@ -164,9 +164,11 @@ namespace OptiTrack.Telemetry {
 		}
 
 
-		private static string GetRhinoVersion() {
+		private static string GetRhinoMajorVersion() {
 			try {
-				return Rhino.RhinoApp.Version.ToString();
+				string version = Rhino.RhinoApp.Version.ToString();
+				int    split   = version.IndexOf('.');
+				return split > 0 ? version.Substring(0, split) : version;
 			}
 			catch {
 				return "unknown";

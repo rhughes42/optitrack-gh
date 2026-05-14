@@ -21,13 +21,18 @@ namespace OptiTrack.Telemetry {
 				"machine",
 				"marker",
 				"model",
-				"name",
 				"path",
 				"position",
 				"project",
 				"rigidbody",
 				"token",
-				"user"
+				"user",
+				"username",
+				"machine_name",
+				"document_name",
+				"rigid_body_name",
+				"model_name",
+				"project_name"
 		};
 
 
