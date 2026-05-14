@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+
 namespace OptiTrack.Core {
 
 	public interface IOptiTrackClient {
@@ -14,8 +15,10 @@ namespace OptiTrack.Core {
 
 		event EventHandler<OptiTrackConnectionEventArgs> ConnectionChanged;
 
-		Task ConnectAsync( OptiTrackConnectionOptions options, CancellationToken cancellationToken );
+		Task ConnectAsync(OptiTrackConnectionOptions options, CancellationToken cancellationToken);
 
 		Task DisconnectAsync();
+
 	}
+
 }

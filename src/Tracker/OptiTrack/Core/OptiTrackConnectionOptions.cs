@@ -1,9 +1,12 @@
 namespace OptiTrack.Core {
 
 	public enum OptiTrackConnectionType {
+
 		Multicast,
 		Unicast
+
 	}
+
 
 	public sealed class OptiTrackConnectionOptions {
 
@@ -32,5 +35,7 @@ namespace OptiTrack.Core {
 		public bool YUp { get; set; }
 
 		public bool DebugLogging { get; set; }
+
 	}
+
 }

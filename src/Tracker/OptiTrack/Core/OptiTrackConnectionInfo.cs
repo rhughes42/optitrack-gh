@@ -6,6 +6,7 @@ namespace OptiTrack.Core {
 			Status = OptiTrackConnectionStatus.Disconnected;
 		}
 
+
 		public OptiTrackConnectionStatus Status { get; set; }
 
 		public string LocalAddress { get; set; } = string.Empty;
@@ -23,5 +24,7 @@ namespace OptiTrack.Core {
 		public bool IsConnected {
 			get { return Status == OptiTrackConnectionStatus.Connected; }
 		}
+
 	}
+
 }

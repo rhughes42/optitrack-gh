@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 
+
 namespace OptiTrack.Core {
 
 	public sealed class OptiTrackMarker {
@@ -13,7 +14,9 @@ namespace OptiTrack.Core {
 		public double Y { get; set; }
 
 		public double Z { get; set; }
+
 	}
+
 
 	public sealed class OptiTrackRigidBody {
 
@@ -36,23 +39,28 @@ namespace OptiTrack.Core {
 		public double Qz { get; set; }
 
 		public double Qw { get; set; }
+
 	}
+
 
 	public sealed class OptiTrackSkeleton {
 
 		public int Id { get; set; }
 
 		public string Name { get; set; } = string.Empty;
+
 	}
+
 
 	public sealed class OptiTrackFrame {
 
 		public OptiTrackFrame() {
-			Markers = new List<OptiTrackMarker>();
-			RigidBodies = new List<OptiTrackRigidBody>();
-			Skeletons = new List<OptiTrackSkeleton>();
+			Markers        = new List<OptiTrackMarker>();
+			RigidBodies    = new List<OptiTrackRigidBody>();
+			Skeletons      = new List<OptiTrackSkeleton>();
 			StatusMessages = new List<string>();
 		}
+
 
 		public int FrameNumber { get; set; }
 
@@ -71,5 +79,7 @@ namespace OptiTrack.Core {
 		public IReadOnlyList<OptiTrackSkeleton> Skeletons { get; set; }
 
 		public IReadOnlyList<string> StatusMessages { get; set; }
+
 	}
+
 }
