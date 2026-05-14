@@ -58,7 +58,7 @@ For telemetry-sensitive changes, also add:
 
 ```text
 docs/telemetry.md
-src/Tracker/OptiTrack/Telemetry/TelemetrySanitizer.cs
+src/Tracker.Telemetry/Telemetry/TelemetrySanitizer.cs
 ```
 
 For recording or replay changes, also add:
