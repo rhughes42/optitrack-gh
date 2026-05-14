@@ -12,7 +12,7 @@ Tracker must remain usable without telemetry. Error reporting is optional and di
 
 ## Future Sentry Configuration
 
-Tracker v1.5.0 includes optional Sentry support through the official Sentry .NET SDK. Configuration should come from one of these sources:
+Tracker v1.6.0 includes optional Sentry support through the official Sentry .NET SDK. Configuration should come from one of these sources:
 
 - Environment variables
 - A local config file excluded from source control
@@ -22,7 +22,7 @@ Recognized placeholder settings:
 
 - `SENTRY_DSN` - optional DSN; telemetry remains disabled when absent or empty.
 - `SENTRY_ENVIRONMENT` - optional environment name such as `development`, `lab`, or `production`.
-- `SENTRY_RELEASE` - optional release identifier, for example `tracker@1.5.0`.
+- `SENTRY_RELEASE` - optional release identifier, for example `tracker@1.6.0`.
 - `SENTRY_TRACES_SAMPLE_RATE` - optional numeric sample rate for aggregate performance telemetry.
 
 A local config file named `tracker.telemetry.local.json` may be placed next to `Tracker.gha`. It is ignored by git and may contain:
@@ -31,12 +31,12 @@ A local config file named `tracker.telemetry.local.json` may be placed next to `
 {
   "SENTRY_DSN": "",
   "SENTRY_ENVIRONMENT": "local",
-  "SENTRY_RELEASE": "tracker@1.5.0",
+  "SENTRY_RELEASE": "tracker@1.6.0",
   "SENTRY_TRACES_SAMPLE_RATE": "0"
 }
 ```
 
-## Current v1.5.0 Boundary
+## Current v1.6.0 Boundary
 
 Tracker includes an internal telemetry boundary:
 
@@ -109,6 +109,26 @@ Performance monitoring, if enabled, should use aggregate spans and counters only
 - NatNet connection state transitions without IP addresses or asset names
 
 Do not attach frame payloads or per-marker/per-rigid-body values.
+
+## Recording and Replay Rules (v1.6.0)
+
+Allowed recording/replay telemetry:
+
+- `recording_start` / `recording_stop` event counts
+- replay load success/failure counts
+- parse error type categories
+- aggregate frame counts
+- replay playback duration and late-frame counters
+- recording `format_version`
+
+Prohibited recording/replay telemetry:
+
+- recording file path
+- recording file name from user input
+- marker coordinates or point arrays
+- rigid body names
+- raw serialized frames
+- project/model identifiers
 
 ## Disable Completely
 

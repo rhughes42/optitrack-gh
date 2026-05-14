@@ -66,7 +66,11 @@
     <Compile Include="Components\ApplyOptiTrackTransformComponent.cs" />
     <Compile Include="Components\CalibrateOptiTrackFrameComponent.cs" />
     <Compile Include="Components\FilterRigidBodiesComponent.cs" />
+    <Compile Include="Components\InspectRecordingMetadataComponent.cs" />
+    <Compile Include="Components\LoadOptiTrackRecordingComponent.cs" />
     <Compile Include="Components\MarkersToPointsComponent.cs" />
+    <Compile Include="Components\RecordOptiTrackStreamComponent.cs" />
+    <Compile Include="Components\ReplayOptiTrackRecordingComponent.cs" />
     <Compile Include="Components\RigidBodyToPlaneComponent.cs" />
     <Compile Include="Components\RigidBodyToTransformComponent.cs" />
     <Compile Include="Components\SmoothPoseStreamComponent.cs" />
@@ -81,6 +85,11 @@
     <Compile Include="OptiTrack\Core\OptiTrackModels.cs" />
     <Compile Include="OptiTrack\NatNet\NatNetFrameConverter.cs" />
     <Compile Include="OptiTrack\NatNet\NatNetOptiTrackClient.cs" />
+    <Compile Include="OptiTrack\Recording\OptiTrackFrameSnapshot.cs" />
+    <Compile Include="OptiTrack\Recording\OptiTrackRecordingModels.cs" />
+    <Compile Include="OptiTrack\Recording\OptiTrackRecordingSerializer.cs" />
+    <Compile Include="OptiTrack\Recording\OptiTrackRecordingSession.cs" />
+    <Compile Include="OptiTrack\Recording\OptiTrackReplayClient.cs" />
     <Compile Include="OptiTrack\Telemetry\ITelemetryService.cs" />
     <Compile Include="OptiTrack\Telemetry\NoOpTelemetryService.cs" />
     <Compile Include="OptiTrack\Telemetry\SentryTelemetryOptions.cs" />

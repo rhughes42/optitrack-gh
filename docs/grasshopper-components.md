@@ -64,3 +64,16 @@ All components below are small, composable operations and are not tightly couple
 | `Velocity / Acceleration Estimate` | `Tracker > Calibration` | Estimates velocity/acceleration from timestamped points. |
 
 Telemetry for these components is optional and disabled by default. When enabled, only sanitized aggregate operation metrics are reported.
+
+## Recording and Replay Components
+
+These components support offline testing without Motive.
+
+| Component | Category | Purpose |
+| --- | --- | --- |
+| `Record OptiTrack Stream` | `Tracker > Recording` | Records `OptiTrackFrame` streams and saves JSON files with metadata. |
+| `Load OptiTrack Recording` | `Tracker > Recording` | Loads recording JSON files into a replayable object. |
+| `Replay OptiTrack Recording` | `Tracker > Recording` | Plays, pauses, loops, scrubs, and speed-controls recordings. |
+| `Inspect Recording Metadata` | `Tracker > Recording` | Reads format version, source, units, frame count, and duration. |
+
+Replay uses the same internal `OptiTrackFrame` domain model as live capture. Telemetry is optional and only reports aggregate counters/durations and error categories.

@@ -2,14 +2,14 @@
 
 Tracker is a Grasshopper plugin for receiving real-time OptiTrack motion-capture data from NaturalPoint Motive through the NatNet API.
 
-The plugin exposes an **OptiTrack Stream** live-capture component plus reusable geometry/calibration components for frame conversion, filtering, smoothing, and transform workflows.
+The plugin exposes an **OptiTrack Stream** live-capture component plus reusable geometry/calibration components for frame conversion, filtering, smoothing, transform workflows, and offline recording/replay.
 
 ## Requirements
 
 - Rhino 8 with Grasshopper
 - Windows
-- OptiTrack Motive running on the local network
-- Motive configured to broadcast NatNet data
+- OptiTrack Motive running on the local network (live capture mode)
+- Motive configured to broadcast NatNet data (live capture mode)
 - NatNet SDK 4.0 managed/native runtime files
 
 This repository currently bundles the NatNet 4.0 runtime files under `lib/NatNet`:
@@ -50,6 +50,8 @@ See [docs/setup.md](docs/setup.md) for more detail.
 6. Set `Connect` to `true`.
 7. Use the component menu to enable rigid-body output when needed.
 
+For offline testing without Motive, use the recording/replay components documented in [docs/recording-and-replay.md](docs/recording-and-replay.md).
+
 ## Known Limitations
 
 - NatNet connection mode is currently multicast in code.
@@ -75,7 +77,7 @@ Maintainers may use the Codex Sentry plugin for read-only issue review, but that
 
 ## Version
 
-Current modernization target: `v1.5.0`.
+Current modernization target: `v1.6.0`.
 
 ## Contributors
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.6.0
+
+- Added an `OptiTrack.Recording` layer with JSON recording models, serialization helpers, a recording session utility, and a replay `IOptiTrackClient` implementation.
+- Added reusable Grasshopper recording/replay components: `Record OptiTrack Stream`, `Load OptiTrack Recording`, `Replay OptiTrack Recording`, and `Inspect Recording Metadata`.
+- Added sample synthetic recording data at `examples/data/sample-rigid-body-recording.json`.
+- Added recording/replay documentation including file format, offline development workflow, and data-awareness guidance.
+- Updated architecture and telemetry documentation with live vs replay flow and recording/replay telemetry constraints.
+- Updated plugin version metadata to `1.6.0`.
+
 ## v1.5.0
 
 - Added reusable Grasshopper geometry components: `Rigid Body To Plane`, `Rigid Body To Transform`, `Markers To Points`, `Apply OptiTrack Transform`, `Calibrate OptiTrack Frame`, `Filter Rigid Bodies`, `Smooth Pose Stream`, and `Velocity / Acceleration Estimate`.

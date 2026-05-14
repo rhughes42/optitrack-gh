@@ -5,8 +5,11 @@ Tracker separates Grasshopper UI code from NatNet SDK-specific code so future Na
 ```mermaid
 flowchart LR
   Motive[OptiTrack Motive<br/>NatNet broadcast] --> Adapter[NatNet adapter<br/>OptiTrack.NatNet]
+  Recording[Recording JSON<br/>examples/data or user files] --> Replay[Replay adapter<br/>OptiTrack.Recording]
   Adapter --> Core[OptiTrack core models<br/>OptiTrack.Core]
+  Replay --> Core
   Adapter --> Telemetry[Telemetry abstraction<br/>NoOp by default]
+  Replay --> Telemetry
   Core --> Grasshopper[Grasshopper components<br/>Tracker]
   Grasshopper --> Rhino[Rhino geometry outputs<br/>points, labels, planes]
   Grasshopper --> Telemetry
@@ -17,6 +20,8 @@ flowchart LR
 `OptiTrack.NatNet` is the only layer that should reference `NatNetML` classes. It owns the NatNet client, data descriptors, frame event callback, and conversion into SDK-independent models.
 
 `OptiTrack.Core` contains internal domain models and `IOptiTrackClient`. This layer does not know about Rhino, Grasshopper, or Sentry.
+
+`OptiTrack.Recording` adds a JSON recording container, replay client (`OptiTrackReplayClient`), and recording session utilities. Replay reuses the same `OptiTrackFrame` models as live NatNet capture.
 
 `TrackerComponent` consumes `IOptiTrackClient`, receives `OptiTrackFrame` instances, and converts them into Grasshopper outputs. Rhino geometry creation remains in the Grasshopper layer.
 
