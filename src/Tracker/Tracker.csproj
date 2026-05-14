@@ -63,16 +63,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Icons.resx</DependentUpon>
     </Compile>
-    <Compile Include="Components\ApplyOptiTrackTransformComponent.cs" />
-    <Compile Include="Components\CalibrateOptiTrackFrameComponent.cs" />
-    <Compile Include="Components\FilterRigidBodiesComponent.cs" />
-    <Compile Include="Components\MarkersToPointsComponent.cs" />
-    <Compile Include="Components\RigidBodyToPlaneComponent.cs" />
-    <Compile Include="Components\RigidBodyToTransformComponent.cs" />
-    <Compile Include="Components\SmoothPoseStreamComponent.cs" />
-    <Compile Include="Components\VelocityAccelerationEstimateComponent.cs" />
-    <Compile Include="OptiTrack\Geometry\AxisRemapMode.cs" />
-    <Compile Include="OptiTrack\Geometry\OptiTrackGeometryConverter.cs" />
     <Compile Include="OptiTrack\Core\IOptiTrackClient.cs" />
     <Compile Include="OptiTrack\Core\OptiTrackConnectionInfo.cs" />
     <Compile Include="OptiTrack\Core\OptiTrackConnectionOptions.cs" />
@@ -89,7 +79,6 @@
     <Compile Include="OptiTrack\Telemetry\TelemetryEvent.cs" />
     <Compile Include="OptiTrack\Telemetry\TelemetrySanitizer.cs" />
     <Compile Include="OptiTrack\Telemetry\TelemetryScope.cs" />
-    <Compile Include="OptiTrack\Telemetry\TelemetryServiceProvider.cs" />
     <Compile Include="OptiTrack\Telemetry\TelemetrySeverity.cs" />
     <Compile Include="TrackerComponent.cs" />
     <Compile Include="TrackerInfo.cs" />
