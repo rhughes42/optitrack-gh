@@ -48,7 +48,7 @@ Check these items:
 
 ## Telemetry Enabled or Disabled
 
-Telemetry/error reporting is disabled by default. In v1.5.0 Sentry is available only when `Enable Telemetry` is `true` and `SENTRY_DSN` or `tracker.telemetry.local.json` is configured. Removing that configuration or setting `Enable Telemetry` to `false` disables reporting.
+Telemetry/error reporting is disabled by default. In v1.4.0 Sentry is available only when `Enable Telemetry` is `true` and `SENTRY_DSN` or `tracker.telemetry.local.json` is configured. Removing that configuration or setting `Enable Telemetry` to `false` disables reporting.
 
 Maintainers using the Codex Sentry plugin for read-only issue review should configure `SENTRY_AUTH_TOKEN` only in their local environment. That token is not required to run Tracker and must not be committed.
 
