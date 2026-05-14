@@ -16,13 +16,32 @@
       "IsRecording": false,
       "AssetsChanged": false,
       "Markers": [
-        { "Id": 1, "Label": "M1", "X": 0.1, "Y": 0.2, "Z": 0.3 }
+        {
+          "Id": 1,
+          "Label": "M1",
+          "X": 0.1,
+          "Y": 0.2,
+          "Z": 0.3
+        }
       ],
       "RigidBodies": [
-        { "Id": 1, "Name": "RB_A", "IsTracked": true, "X": 0.0, "Y": 0.0, "Z": 0.0, "Qx": 0.0, "Qy": 0.0, "Qz": 0.0, "Qw": 1.0 }
+        {
+          "Id": 1,
+          "Name": "RB_A",
+          "IsTracked": true,
+          "X": 0.0,
+          "Y": 0.0,
+          "Z": 0.0,
+          "Qx": 0.0,
+          "Qy": 0.0,
+          "Qz": 0.0,
+          "Qw": 1.0
+        }
       ],
       "Skeletons": [],
-      "StatusMessages": [ "Synthetic frame 1" ]
+      "StatusMessages": [
+        "Synthetic frame 1"
+      ]
     },
     {
       "FrameNumber": 2,
@@ -31,13 +50,32 @@
       "IsRecording": false,
       "AssetsChanged": false,
       "Markers": [
-        { "Id": 1, "Label": "M1", "X": 0.11, "Y": 0.2, "Z": 0.31 }
+        {
+          "Id": 1,
+          "Label": "M1",
+          "X": 0.11,
+          "Y": 0.2,
+          "Z": 0.31
+        }
       ],
       "RigidBodies": [
-        { "Id": 1, "Name": "RB_A", "IsTracked": true, "X": 0.01, "Y": 0.0, "Z": 0.0, "Qx": 0.0, "Qy": 0.0, "Qz": 0.0, "Qw": 1.0 }
+        {
+          "Id": 1,
+          "Name": "RB_A",
+          "IsTracked": true,
+          "X": 0.01,
+          "Y": 0.0,
+          "Z": 0.0,
+          "Qx": 0.0,
+          "Qy": 0.0,
+          "Qz": 0.0,
+          "Qw": 1.0
+        }
       ],
       "Skeletons": [],
-      "StatusMessages": [ "Synthetic frame 2" ]
+      "StatusMessages": [
+        "Synthetic frame 2"
+      ]
     },
     {
       "FrameNumber": 3,
@@ -46,13 +84,32 @@
       "IsRecording": false,
       "AssetsChanged": false,
       "Markers": [
-        { "Id": 1, "Label": "M1", "X": 0.12, "Y": 0.2, "Z": 0.32 }
+        {
+          "Id": 1,
+          "Label": "M1",
+          "X": 0.12,
+          "Y": 0.2,
+          "Z": 0.32
+        }
       ],
       "RigidBodies": [
-        { "Id": 1, "Name": "RB_A", "IsTracked": true, "X": 0.02, "Y": 0.0, "Z": 0.0, "Qx": 0.0, "Qy": 0.0, "Qz": 0.0, "Qw": 1.0 }
+        {
+          "Id": 1,
+          "Name": "RB_A",
+          "IsTracked": true,
+          "X": 0.02,
+          "Y": 0.0,
+          "Z": 0.0,
+          "Qx": 0.0,
+          "Qy": 0.0,
+          "Qz": 0.0,
+          "Qw": 1.0
+        }
       ],
       "Skeletons": [],
-      "StatusMessages": [ "Synthetic frame 3" ]
+      "StatusMessages": [
+        "Synthetic frame 3"
+      ]
     }
   ]
 }

@@ -6,7 +6,6 @@
 2. Restore NuGet packages for `Tracker.sln`.
 3. Build `Tracker.sln` in Release mode.
 4. Confirm the output folder contains:
-
    - `Tracker.gha`
    - `NatNetML.dll`
    - `NatNetLib.dll`

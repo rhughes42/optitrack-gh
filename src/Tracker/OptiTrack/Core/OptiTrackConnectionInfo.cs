@@ -25,6 +25,16 @@ namespace OptiTrack.Core {
 			get { return Status == OptiTrackConnectionStatus.Connected; }
 		}
 
+		public string AdapterName {
+			get;
+			set;
+		}
+
+		public string Message {
+			get;
+			set;
+		}
+
 	}
 
 }

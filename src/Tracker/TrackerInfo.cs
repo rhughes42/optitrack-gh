@@ -3,6 +3,7 @@ using System.Drawing;
 
 using Grasshopper.Kernel;
 
+
 namespace Tracker {
 
 	/// <summary>
@@ -48,7 +49,7 @@ namespace Tracker {
 		/// <returns> The ID of the plugin. </returns>
 		public override Guid Id {
 			get {
-				return new Guid( "CF473A4D-483F-4556-B3FA-91ED21096B82" );
+				return new Guid("CF473A4D-483F-4556-B3FA-91ED21096B82");
 			}
 		}
 
@@ -73,5 +74,7 @@ namespace Tracker {
 				return "tech@graphconsult.xyz";
 			}
 		}
+
 	}
+
 }

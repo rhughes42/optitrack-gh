@@ -9,11 +9,11 @@ namespace OptiTrack.Recording {
 
 	public sealed class OptiTrackReplayClient : IOptiTrackClient {
 
-		private readonly object                  sync = new object();
-		private          CancellationTokenSource playbackCancellation;
-		private          Task                    playbackTask = Task.CompletedTask;
-		private          int                     currentIndex;
-		private          bool                    pauseRequested;
+		readonly object         sync = new object();
+		CancellationTokenSource playbackCancellation;
+		Task                    playbackTask = Task.CompletedTask;
+		int                     currentIndex;
+		bool                    pauseRequested;
 
 		public bool LoopPlayback { get; set; }
 
@@ -35,11 +35,7 @@ namespace OptiTrack.Recording {
 
 
 		public void LoadRecording(OptiTrackRecording recording) {
-			if (recording == null) {
-				throw new ArgumentNullException(nameof(recording));
-			}
-
-			Recording           = recording;
+			Recording           = recording ?? throw new ArgumentNullException(nameof(recording));
 			currentIndex        = 0;
 			DroppedOrLateFrames = 0;
 		}
@@ -103,9 +99,7 @@ namespace OptiTrack.Recording {
 
 			IsConnected = false;
 
-			if (playbackCancellation != null) {
-				playbackCancellation.Cancel();
-			}
+			playbackCancellation?.Cancel();
 
 			try {
 				await playbackTask.ConfigureAwait(false);
@@ -120,7 +114,7 @@ namespace OptiTrack.Recording {
 		}
 
 
-		private async Task PlaybackLoopAsync(CancellationToken cancellationToken) {
+		async Task PlaybackLoopAsync(CancellationToken cancellationToken) {
 			while (!cancellationToken.IsCancellationRequested && Recording != null && Recording.Frames.Count > 0) {
 				if (pauseRequested) {
 					await Task.Delay(20, cancellationToken).ConfigureAwait(false);
@@ -179,7 +173,7 @@ namespace OptiTrack.Recording {
 		}
 
 
-		private void RaiseConnectionChanged(string message) {
+		void RaiseConnectionChanged(string message) {
 			ConnectionChanged?.Invoke(this, new OptiTrackConnectionEventArgs(ConnectionInfo, message));
 		}
 
