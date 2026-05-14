@@ -51,5 +51,6 @@ Sentry is disabled by default. To enable it for sanitized error reporting:
 1. Set `Enable Telemetry` to `true` on the component.
 2. Provide a DSN through `SENTRY_DSN` or a local `tracker.telemetry.local.json` file next to the plugin output.
 3. Optionally set `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, and `SENTRY_TRACES_SAMPLE_RATE`.
+4. If `SENTRY_RELEASE` is not set, Tracker uses `optitrack-gh@<plugin-version>`.
 
 Do not commit local telemetry config files or DSNs.

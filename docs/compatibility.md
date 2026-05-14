@@ -4,7 +4,7 @@ Tracker is a Rhino/Grasshopper plugin for OptiTrack Motive through NatNet.
 
 For SDK-specific policy and upgrade workflow, see [sdk-compatibility.md](sdk-compatibility.md) and [sdk-upgrade-notes.md](sdk-upgrade-notes.md).
 
-## Runtime and SDK Matrix (v1.9.0)
+## Runtime and SDK Matrix (v1.10.0)
 
 | Area | Current / Expected | Tested | Notes |
 | --- | --- | --- | --- |
@@ -25,7 +25,7 @@ For SDK-specific policy and upgrade workflow, see [sdk-compatibility.md](sdk-com
 
 ## Compatibility Diagnostics
 
-Tracker v1.9.0 emits safe compatibility diagnostics (component diagnostics and optional telemetry), including:
+Tracker v1.10.0 emits safe compatibility diagnostics (component diagnostics and optional telemetry), including:
 
 - `adapter_name`
 - `plugin_version`
@@ -37,3 +37,4 @@ Tracker v1.9.0 emits safe compatibility diagnostics (component diagnostics and o
 - `sdk_load_failure_type`
 
 Sensitive fields such as IPs, file paths, usernames, machine names, and frame payload data are excluded.
+

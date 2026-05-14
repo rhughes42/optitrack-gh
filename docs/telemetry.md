@@ -12,7 +12,7 @@ Tracker must remain usable without telemetry. Error reporting is optional and di
 
 ## Future Sentry Configuration
 
-Tracker v1.7.0 documentation includes optional Sentry support through the official Sentry .NET SDK. Configuration should come from one of these sources:
+Tracker v1.10.0 includes optional Sentry support through the official Sentry .NET SDK. Configuration should come from one of these sources:
 
 - Environment variables
 - A local config file excluded from source control
@@ -22,7 +22,7 @@ Recognized placeholder settings:
 
 - `SENTRY_DSN` - optional DSN; telemetry remains disabled when absent or empty.
 - `SENTRY_ENVIRONMENT` - optional environment name such as `development`, `lab`, or `production`.
-- `SENTRY_RELEASE` - optional release identifier, for example `tracker@1.6.0`.
+- `SENTRY_RELEASE` - optional release identifier, for example `optitrack-gh@1.10.0`.
 - `SENTRY_TRACES_SAMPLE_RATE` - optional numeric sample rate for aggregate performance telemetry.
 
 A local config file named `tracker.telemetry.local.json` may be placed next to `Tracker.gha`. It is ignored by git and may contain:
@@ -31,12 +31,14 @@ A local config file named `tracker.telemetry.local.json` may be placed next to `
 {
   "SENTRY_DSN": "",
   "SENTRY_ENVIRONMENT": "local",
-  "SENTRY_RELEASE": "tracker@1.6.0",
+  "SENTRY_RELEASE": "optitrack-gh@1.10.0",
   "SENTRY_TRACES_SAMPLE_RATE": "0"
 }
 ```
 
-## Current v1.9.0 Boundary
+When `SENTRY_RELEASE` is absent, Tracker defaults to `optitrack-gh@<plugin-version>`.
+
+## Current v1.10.0 Boundary
 
 Tracker includes an internal telemetry boundary:
 
@@ -103,7 +105,7 @@ Any future telemetry integration must scrub sensitive data before an event leave
 
 ## Performance Monitoring
 
-Performance monitoring, if enabled, uses low-cardinality spans and aggregate counters only. v1.8.0 span names:
+Performance monitoring, if enabled, uses low-cardinality spans and aggregate counters only. v1.10.0 span names:
 
 - `natnet.connect`
 - `natnet.disconnect`
@@ -135,7 +137,7 @@ Acceptable aggregate examples include:
 
 Do not attach frame payloads or per-marker/per-rigid-body values.
 
-## SDK Compatibility Diagnostics (v1.9.0)
+## SDK Compatibility Diagnostics (v1.10.0)
 
 Tracker can emit sanitized compatibility diagnostics when telemetry is enabled and configured. Allowed compatibility tags:
 
@@ -149,7 +151,7 @@ Tracker can emit sanitized compatibility diagnostics when telemetry is enabled a
 
 Compatibility diagnostics must not include IP addresses, file paths, machine names, usernames, project/model names, or raw frame content.
 
-## Recording and Replay Rules (v1.9.0)
+## Recording and Replay Rules (v1.10.0)
 
 Allowed recording/replay telemetry:
 
@@ -172,3 +174,4 @@ Prohibited recording/replay telemetry:
 ## Disable Completely
 
 Telemetry is disabled when `Enable Telemetry` is false, when `SENTRY_DSN` is missing or empty, or when local configuration is invalid. Users can remove `tracker.telemetry.local.json`, clear related environment variables, or set the component input to false to disable reporting completely.
+

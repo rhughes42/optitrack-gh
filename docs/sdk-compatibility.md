@@ -1,4 +1,4 @@
-# SDK Compatibility (v1.9.0)
+# SDK Compatibility (v1.10.0)
 
 This document defines the currently supported OptiTrack SDK surface and the required verification process before any SDK upgrade.
 
@@ -85,3 +85,5 @@ Use this checklist after any SDK or adapter change:
 7. Replay mode still works with sample recording.
 8. Telemetry disabled mode still works.
 9. Telemetry enabled with test DSN emits sanitized diagnostics only.
+
+

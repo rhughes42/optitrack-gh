@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 
 using Newtonsoft.Json.Linq;
 
@@ -13,7 +14,7 @@ namespace OptiTrack.Telemetry {
 
 		public string Environment { get; set; } = string.Empty;
 
-		public string Release { get; set; } = "tracker@1.4.0";
+		public string Release { get; set; } = BuildDefaultReleaseName();
 
 		public double? TracesSampleRate { get; set; } = 0.0;
 
@@ -22,7 +23,7 @@ namespace OptiTrack.Telemetry {
 			SentryTelemetryOptions options = new SentryTelemetryOptions {
 					Dsn         = System.Environment.GetEnvironmentVariable("SENTRY_DSN") ?? string.Empty,
 					Environment = System.Environment.GetEnvironmentVariable("SENTRY_ENVIRONMENT") ?? string.Empty,
-					Release     = System.Environment.GetEnvironmentVariable("SENTRY_RELEASE") ?? "tracker@1.4.0"
+					Release     = System.Environment.GetEnvironmentVariable("SENTRY_RELEASE") ?? BuildDefaultReleaseName()
 			};
 
 			string tracesSampleRate = System.Environment.GetEnvironmentVariable("SENTRY_TRACES_SAMPLE_RATE");
@@ -60,6 +61,12 @@ namespace OptiTrack.Telemetry {
 
 		public bool HasValidDsn() {
 			return !string.IsNullOrWhiteSpace(Dsn) && Uri.TryCreate(Dsn, UriKind.Absolute, out _);
+		}
+
+
+		private static string BuildDefaultReleaseName() {
+			string version = typeof(SentryTelemetryOptions).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "1.10.0";
+			return "optitrack-gh@" + version;
 		}
 
 	}

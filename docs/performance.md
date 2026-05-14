@@ -1,4 +1,4 @@
-# Performance and Update Cadence (v1.8.0)
+# Performance and Update Cadence (v1.10.0)
 
 ## Live Frame Processing Model
 
@@ -43,3 +43,4 @@ Recommended starting values:
 - Conversion to Rhino/Grasshopper geometry happens on solve.
 - Update scheduling uses Grasshopper document scheduling to avoid UI thread blocking.
 - Component deletion triggers disconnect and timer disposal.
+

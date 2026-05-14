@@ -1,4 +1,4 @@
-# Optional Sentry Setup (v1.9.0)
+# Optional Sentry Setup (v1.10.0)
 
 Sentry is optional in Tracker and is disabled by default.
 
@@ -29,10 +29,12 @@ Example local file:
 {
   "SENTRY_DSN": "",
   "SENTRY_ENVIRONMENT": "local",
-  "SENTRY_RELEASE": "tracker@1.8.0",
+  "SENTRY_RELEASE": "optitrack-gh@1.10.0",
   "SENTRY_TRACES_SAMPLE_RATE": "0"
 }
 ```
+
+If `SENTRY_RELEASE` is not set, Tracker defaults to `optitrack-gh@<plugin-version>`.
 
 ## Sampling Guidance
 
@@ -48,6 +50,14 @@ Recommended values:
 
 - Enable: set component `Enable Telemetry = true` and provide valid config.
 - Disable: set `Enable Telemetry = false` or remove/clear `SENTRY_DSN`.
+
+## 3.1 Optional Release Metadata
+
+- `SENTRY_RELEASE` is optional.
+- Recommended format: `optitrack-gh@1.10.0`.
+- Set via environment variables or CI secrets only.
+- Sentry CLI is optional and not required for local builds or release packaging.
+- Packaging must not fail when Sentry is not configured.
 
 ## 4. Safe Sentry Data Policy
 

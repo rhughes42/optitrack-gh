@@ -1,4 +1,9 @@
 # Tracker
+[![Version](https://img.shields.io/badge/version-v1.10.0-blue)](#version)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-informational)](#requirements)
+[![Rhino](https://img.shields.io/badge/Rhino-8-green)](#requirements)
+[![Telemetry](https://img.shields.io/badge/telemetry-optional-lightgrey)](#telemetry-and-error-reporting)
+[![License](https://img.shields.io/badge/license-see%20LICENSE-lightgrey)](LICENSE)
 
 Tracker is a Grasshopper plugin for receiving real-time OptiTrack motion-capture data from NaturalPoint Motive through the NatNet API.
 
@@ -16,6 +21,7 @@ The plugin exposes an **OptiTrack Stream** live-capture component plus reusable 
 - [Troubleshooting](docs/troubleshooting.md)
 - [Telemetry Policy](docs/telemetry.md)
 - [Optional Sentry Setup](docs/sentry.md)
+- [Licensing Notes](docs/licensing.md)
 - [Documentation Index](docs/README.md)
 
 ## Requirements
@@ -33,7 +39,7 @@ This repository currently bundles the NatNet 4.0 runtime files under `lib/NatNet
 - `NatNetLib.lib`
 - `NatNetML.xml`
 
-The bundled SDK license status should be reviewed before redistribution. The files are retained for build and runtime compatibility because the plugin depends on `NatNetML.dll`.
+The bundled SDK license status should be reviewed before redistribution. If redistribution rights are unclear, publish release packages without NatNet DLLs and require manual NatNet SDK installation. See [docs/licensing.md](docs/licensing.md).
 
 ## Repository Layout
 
@@ -53,6 +59,16 @@ The bundled SDK license status should be reviewed before redistribution. The fil
 4. Restart Rhino and Grasshopper.
 
 See [docs/setup.md](docs/setup.md) for more detail.
+
+## Release Packaging
+
+Create a stable release zip:
+
+`pwsh ./build/package.ps1 -Version 1.10.0 -Configuration Release`
+
+To include bundled NatNet DLLs only when redistribution rights are confirmed:
+
+`pwsh ./build/package.ps1 -Version 1.10.0 -Configuration Release -IncludeBundledNatNet`
 
 ## Basic Usage
 
@@ -76,7 +92,7 @@ For offline testing without Motive, use the recording/replay components document
 
 ## SDK Compatibility
 
-Tracker v1.9.0 keeps NatNet 4.0 as the active, compatibility-managed baseline.
+Tracker v1.10.0 keeps NatNet 4.0 as the active, compatibility-managed baseline.
 
 - Active adapter: `OptiTrack.NatNet4Adapter`
 - Future adapter placeholder: `OptiTrack.NatNetLatestAdapter` (not enabled)
@@ -104,7 +120,7 @@ Maintainers may use the Codex Sentry plugin for read-only issue review, but that
 
 ## Version
 
-Current modernization target: `v1.9.0`.
+Current modernization target: `v1.10.0`.
 
 ## Contributors
 

@@ -15,4 +15,7 @@
 - [Troubleshooting](troubleshooting.md)
 - [Telemetry Policy](telemetry.md)
 - [Sentry Setup (Optional)](sentry.md)
+- [Licensing](licensing.md)
+- [Assets Placeholder](assets/README.md)
 - [Release Process](release-process.md)
+- [Release Package Layout](release-package.md)

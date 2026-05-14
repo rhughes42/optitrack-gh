@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.10.0
+
+- Updated plugin assembly version metadata to `1.10.0`.
+- Added stable release packaging script at `build/package.ps1` and release package readme template `build/release-README.txt`.
+- Documented package flow for including NatNet DLLs only when redistribution rights are confirmed, with a manual SDK-install fallback path.
+- Added top-level `LICENSE` and new `docs/licensing.md` to explicitly document project licensing and third-party SDK redistribution uncertainty.
+- Added documentation asset placeholders in `docs/assets/README.md`.
+- Updated release process documentation with build/package commands, stable v1.x release checklist, and final manual QA checklist.
+- Updated README metadata/badges and release packaging instructions for GitHub release readiness.
+- Added optional Sentry release metadata defaults: `SENTRY_RELEASE` now defaults to `optitrack-gh@<plugin-version>` when not set.
+- Updated telemetry/sentry documentation for v1.10.0 release metadata guidance and secret-handling boundaries.
+
 ## v1.9.0
 
 - Added formal SDK compatibility documentation and process: `docs/sdk-compatibility.md` and `docs/sdk-upgrade-notes.md`.

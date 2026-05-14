@@ -1,4 +1,4 @@
-# SDK Upgrade Notes (v1.9.0)
+# SDK Upgrade Notes (v1.10.0)
 
 ## NatNet 4.0 Current Adapter
 
@@ -47,3 +47,4 @@ Before bundling a new SDK version, verify:
 - documentation and attribution requirements
 
 Do not commit updated SDK binaries without confirming legal redistribution terms.
+

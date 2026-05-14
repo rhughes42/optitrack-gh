@@ -1,6 +1,6 @@
 # Recording and Replay
 
-Tracker v1.7.0 documents offline recording and replay so geometry and calibration workflows can be developed without a live Motive session.
+Tracker v1.10.0 documents offline recording and replay so geometry and calibration workflows can be developed without a live Motive session.
 
 ## Components
 
@@ -50,3 +50,4 @@ Recording and replay telemetry must remain aggregate-only:
 - prohibited: marker coordinates, rigid body names, file paths, file names, raw frame payloads
 
 Telemetry remains optional and disabled unless explicitly enabled and configured.
+
