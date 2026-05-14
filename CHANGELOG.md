@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.5.0
+
+- Added reusable Grasshopper geometry components: `Rigid Body To Plane`, `Rigid Body To Transform`, `Markers To Points`, `Apply OptiTrack Transform`, `Calibrate OptiTrack Frame`, `Filter Rigid Bodies`, `Smooth Pose Stream`, and `Velocity / Acceleration Estimate`.
+- Added shared conversion utilities in `OptiTrack.Geometry` for rigid body pose conversion, marker conversion, scale handling, axis remapping, and calibration/world transforms.
+- Added sanitized operation-level telemetry for geometry conversion, filtering, smoothing, and calibration operations with aggregate counts and durations only.
+- Added calibration and coordinate documentation for robotics/fabrication workflows.
+- Added new markdown examples for rigid body plane conversion, marker cloud conversion, and robot tool tracking workflow.
+- Updated plugin version metadata to `1.5.0`.
+
 ## v1.4.0
 
 - Expanded the OptiTrack Stream component inputs for connection type, NatNet command/data ports, scale factor, Y-up transform, redraw throttle, debug logging, and optional telemetry enablement.
