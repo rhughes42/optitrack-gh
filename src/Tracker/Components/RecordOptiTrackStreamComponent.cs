@@ -14,9 +14,9 @@ namespace Tracker.Components {
 	/// </summary>
 	public sealed class RecordOptiTrackStreamComponent : GH_Component {
 
-		private static readonly object                    sync    = new object();
-		private static readonly OptiTrackRecordingSession session = new OptiTrackRecordingSession();
-		private static          bool                      lastRecordState;
+		static readonly object                    sync    = new object();
+		static readonly OptiTrackRecordingSession session = new OptiTrackRecordingSession();
+		static          bool                      lastRecordState;
 
 
 		public RecordOptiTrackStreamComponent() : base(
@@ -71,15 +71,22 @@ namespace Tracker.Components {
 			OptiTrackFrame frame  = frameValue as OptiTrackFrame;
 
 			lock (sync) {
-				if (record && !lastRecordState) {
-					session.Start();
-					telemetry.CaptureMessage("recording_started", TelemetrySeverity.Info, new TelemetryContext().SetTag("operation", "record_start"));
-					status = "Recording started.";
-				}
-				else if (!record && lastRecordState) {
-					session.Stop();
-					telemetry.CaptureMessage("recording_stopped", TelemetrySeverity.Info, new TelemetryContext().SetTag("operation", "record_stop"));
-					status = "Recording stopped.";
+				switch (record) {
+					case true when !lastRecordState:
+
+						session.Start();
+						telemetry.CaptureMessage("recording_started", TelemetrySeverity.Info, new TelemetryContext().SetTag("operation", "record_start"));
+						status = "Recording started.";
+
+					break;
+
+					case false when lastRecordState:
+
+						session.Stop();
+						telemetry.CaptureMessage("recording_stopped", TelemetrySeverity.Info, new TelemetryContext().SetTag("operation", "record_stop"));
+						status = "Recording stopped.";
+
+					break;
 				}
 
 				lastRecordState = record;

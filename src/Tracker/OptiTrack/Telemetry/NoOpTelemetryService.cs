@@ -30,9 +30,7 @@ namespace OptiTrack.Telemetry {
 		public void CaptureMessage(string message, TelemetrySeverity severity, TelemetryContext context) { }
 
 
-		public TelemetryScope StartSpan(string operationName, TelemetryContext context) {
-			return new TelemetryScope(this, operationName, context);
-		}
+		public TelemetryScope StartSpan(string operationName, TelemetryContext context) => new TelemetryScope(this, operationName, context);
 
 	}
 

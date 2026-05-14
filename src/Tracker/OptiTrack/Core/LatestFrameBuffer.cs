@@ -5,6 +5,7 @@
  * Notes: Designed for overwrite semantics (latest frame wins) to avoid unbounded queue growth.
  */
 
+
 using System;
 using System.Threading;
 
@@ -19,13 +20,13 @@ namespace OptiTrack.Core {
 	/// </remarks>
 	public sealed class LatestFrameBuffer {
 
-		private readonly object         sync = new object();
-		private          OptiTrackFrame latestFrame;
-		private          DateTime       latestReceivedUtc = DateTime.MinValue;
-		private          long           latestSequence;
-		private          long           lastConsumedSequence;
-		private          long           totalReceived;
-		private          long           totalConsumed;
+		readonly object sync = new object();
+		OptiTrackFrame  latestFrame;
+		DateTime        latestReceivedUtc = DateTime.MinValue;
+		long            latestSequence;
+		long            lastConsumedSequence;
+		long            totalReceived;
+		long            totalConsumed;
 
 
 		/// <summary>

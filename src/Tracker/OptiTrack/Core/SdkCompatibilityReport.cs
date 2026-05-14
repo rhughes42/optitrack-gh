@@ -88,23 +88,21 @@ namespace OptiTrack.Core {
 		/// Formats this report into diagnostics lines for Grasshopper output.
 		/// </summary>
 		/// <returns>Stable low-cardinality diagnostics lines.</returns>
-		public List<string> ToDiagnosticsLines() {
-			return new List<string> {
-					"adapter_name=" + AdapterName,
-					"adapter_version=" + AdapterVersion,
-					"plugin_version=" + PluginVersion,
-					"loaded_natnet_assembly=" + LoadedNatNetAssembly,
-					"natnet_assembly_version=" + NatNetAssemblyVersion,
-					"supported_sdk_version=" + SupportedSdkVersion,
-					"sdk_load_result=" + SdkLoadResult,
-					"connection_mode=" + ConnectionMode,
-					"frame_schema_version=" + FrameSchemaVersion,
-					"rhino_version=" + RhinoVersion,
-					"grasshopper_version=" + GrasshopperVersion,
-					"sentry_sdk_version=" + SentrySdkVersion,
-					"sdk_exception_type=" + (string.IsNullOrWhiteSpace(SdkExceptionType) ? "none" : SdkExceptionType)
-			};
-		}
+		public List<string> ToDiagnosticsLines() => new List<string> {
+				"adapter_name=" + AdapterName,
+				"adapter_version=" + AdapterVersion,
+				"plugin_version=" + PluginVersion,
+				"loaded_natnet_assembly=" + LoadedNatNetAssembly,
+				"natnet_assembly_version=" + NatNetAssemblyVersion,
+				"supported_sdk_version=" + SupportedSdkVersion,
+				"sdk_load_result=" + SdkLoadResult,
+				"connection_mode=" + ConnectionMode,
+				"frame_schema_version=" + FrameSchemaVersion,
+				"rhino_version=" + RhinoVersion,
+				"grasshopper_version=" + GrasshopperVersion,
+				"sentry_sdk_version=" + SentrySdkVersion,
+				"sdk_exception_type=" + (string.IsNullOrWhiteSpace(SdkExceptionType) ? "none" : SdkExceptionType)
+		};
 
 
 		/// <summary>
@@ -154,7 +152,7 @@ namespace OptiTrack.Core {
 		}
 
 
-		private static string FindAssemblyVersion(string assemblyName, out string loadResult) {
+		static string FindAssemblyVersion(string assemblyName, out string loadResult) {
 			Assembly loaded = AppDomain.CurrentDomain.GetAssemblies()
 									 .FirstOrDefault(a => string.Equals(a.GetName().Name, assemblyName, StringComparison.OrdinalIgnoreCase));
 

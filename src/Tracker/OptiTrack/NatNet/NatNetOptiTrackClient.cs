@@ -27,16 +27,16 @@ namespace OptiTrack.NatNet {
 	/// </remarks>
 	public sealed class NatNetOptiTrackClient : IOptiTrackClient {
 
-		private readonly object                     syncRoot = new object();
-		private readonly ITelemetryService          telemetryService;
-		private          NatNetClientML             natNetClient;
-		private          OptiTrackConnectionOptions options;
-		private          List<DataDescriptor>       dataDescriptors;
-		private          List<RigidBody>            rigidBodies;
-		private          List<Skeleton>             skeletons;
-		private          List<ForcePlate>           forcePlates;
-		private          List<string>               statusMessages;
-		private          bool                       assetsChanged;
+		readonly object            syncRoot = new object();
+		readonly ITelemetryService telemetryService;
+		NatNetClientML             natNetClient;
+		OptiTrackConnectionOptions options;
+		List<DataDescriptor>       dataDescriptors;
+		List<RigidBody>            rigidBodies;
+		List<Skeleton>             skeletons;
+		List<ForcePlate>           forcePlates;
+		List<string>               statusMessages;
+		bool                       assetsChanged;
 
 		#region Construction
 
@@ -71,18 +71,19 @@ namespace OptiTrack.NatNet {
 		}
 
 
-		public Task DisconnectAsync() {
-			return Task.Run(() => Disconnect());
-		}
+		public Task DisconnectAsync() => Task.Run(Disconnect);
 
 
-		private void Connect(OptiTrackConnectionOptions connectionOptions, CancellationToken cancellationToken) {
+		void Connect(OptiTrackConnectionOptions connectionOptions, CancellationToken cancellationToken) {
 			OptiTrackConnectionOptions requestedOptions = connectionOptions ?? new OptiTrackConnectionOptions();
 
 			using (telemetryService.StartSpan("natnet.connect", new TelemetryContext().SetTag("connection_type", requestedOptions.ConnectionType.ToString()))) {
 				cancellationToken.ThrowIfCancellationRequested();
-				options              = requestedOptions;
-				options.FrameDivisor = Math.Max(1, options.FrameDivisor);
+
+				lock (syncRoot) {
+					options              = requestedOptions;
+					options.FrameDivisor = Math.Max(1, options.FrameDivisor);
+				}
 
 				SetConnectionStatus(OptiTrackConnectionStatus.Connecting, "Attempting connection to server...");
 
@@ -95,7 +96,7 @@ namespace OptiTrack.NatNet {
 						statusMessages.Add("Server IP set.");
 
 						int[] natNetVersion = natNetClient.NatNetVersion();
-						ConnectionInfo.NatNetVersion = string.Format("{0}.{1}.{2}.{3}", natNetVersion[0], natNetVersion[1], natNetVersion[2], natNetVersion[3]);
+						ConnectionInfo.NatNetVersion = $"{natNetVersion[0]}.{natNetVersion[1]}.{natNetVersion[2]}.{natNetVersion[3]}";
 
 						NatNetClientML.ConnectParams connectParams = new NatNetClientML.ConnectParams {
 								ConnectionType    = ToNatNetConnectionType(options.ConnectionType),
@@ -123,7 +124,7 @@ namespace OptiTrack.NatNet {
 		}
 
 
-		private void Disconnect() {
+		void Disconnect() {
 			using (telemetryService.StartSpan("natnet.disconnect", new TelemetryContext())) {
 				SetConnectionStatus(OptiTrackConnectionStatus.Disconnecting, "Disconnecting from server...");
 
@@ -151,7 +152,7 @@ namespace OptiTrack.NatNet {
 
 		#region SDK Metadata Discovery
 
-		private void FetchServerDescriptor() {
+		void FetchServerDescriptor() {
 			ServerDescription serverDescription = new ServerDescription();
 			int               errorCode         = natNetClient.GetServerDescription(serverDescription);
 
@@ -174,7 +175,7 @@ namespace OptiTrack.NatNet {
 		}
 
 
-		private void FetchDataDescriptions() {
+		void FetchDataDescriptions() {
 			bool result = natNetClient.GetDataDescriptions(out dataDescriptors);
 
 			if (!result) {
@@ -220,8 +221,8 @@ namespace OptiTrack.NatNet {
 
 		#region Frame Handling
 
-		private void OnFrameReady(FrameOfMocapData data, NatNetClientML client) {
-			if (data.iFrame % options.FrameDivisor != 0) {
+		void OnFrameReady(FrameOfMocapData data, NatNetClientML client) {
+			if ((data.iFrame % options.FrameDivisor) != 0) {
 				return;
 			}
 
@@ -230,10 +231,10 @@ namespace OptiTrack.NatNet {
 
 				using (telemetryService.StartSpan("natnet.frame_received", new TelemetryContext().SetMetric("frame_count", data.iFrame))) {
 					lock (syncRoot) {
-						if (data.bTrackingModelsChanged == true
-							|| data.nRigidBodies != rigidBodies.Count
-							|| data.nSkeletons != skeletons.Count
-							|| data.nForcePlates != forcePlates.Count
+						if (data.bTrackingModelsChanged
+							|| (data.nRigidBodies != rigidBodies.Count)
+							|| (data.nSkeletons != skeletons.Count)
+							|| (data.nForcePlates != forcePlates.Count)
 							|| assetsChanged) {
 							assetsChanged = false;
 							FetchDataDescriptions();
@@ -244,9 +245,7 @@ namespace OptiTrack.NatNet {
 
 					EventHandler<OptiTrackFrameEventArgs> handler = FrameReceived;
 
-					if (handler != null) {
-						handler(this, new OptiTrackFrameEventArgs(frame));
-					}
+					handler?.Invoke(this, new OptiTrackFrameEventArgs(frame));
 				}
 			}
 			catch (Exception exception) {
@@ -257,20 +256,18 @@ namespace OptiTrack.NatNet {
 
 		#region Helpers
 
-		private void SetConnectionStatus(OptiTrackConnectionStatus status, string message) {
+		void SetConnectionStatus(OptiTrackConnectionStatus status, string message) {
 			ConnectionInfo.Status = status;
 
 			EventHandler<OptiTrackConnectionEventArgs> handler = ConnectionChanged;
 
-			if (handler != null) {
-				handler(this, new OptiTrackConnectionEventArgs(ConnectionInfo, message));
-			}
+			handler?.Invoke(this, new OptiTrackConnectionEventArgs(ConnectionInfo, message));
 		}
 
 
-		private static ConnectionType ToNatNetConnectionType(OptiTrackConnectionType connectionType) {
-			return connectionType == OptiTrackConnectionType.Unicast ? ConnectionType.Unicast : ConnectionType.Multicast;
-		}
+		static ConnectionType ToNatNetConnectionType(OptiTrackConnectionType connectionType) =>
+				connectionType == OptiTrackConnectionType.Unicast ? ConnectionType.Unicast : ConnectionType.Multicast;
+
 		#endregion
 
 	}

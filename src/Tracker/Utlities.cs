@@ -13,9 +13,7 @@ namespace Tracker {
 		/// </summary>
 		/// <param name="dRads"> The angle in radians. </param>
 		/// <returns> The angle in degrees. </returns>
-		public static double RadiansToDegrees(double dRads) {
-			return dRads * (180.0f / Math.PI);
-		}
+		public static double RadiansToDegrees(double dRads) => dRads * (180.0f / Math.PI);
 
 
 		/// <summary>
@@ -23,9 +21,7 @@ namespace Tracker {
 		/// </summary>
 		/// <param name="number"> The 32-bit integer. </param>
 		/// <returns> The low word of the integer. </returns>
-		public static int LowWord(int number) {
-			return number & 0xFFFF;
-		}
+		public static int LowWord(int number) => number & 0xFFFF;
 
 
 		/// <summary>
@@ -33,9 +29,7 @@ namespace Tracker {
 		/// </summary>
 		/// <param name="number"> The 32-bit integer. </param>
 		/// <returns> The high word of the integer. </returns>
-		public static int HighWord(int number) {
-			return ((number >> 16) & 0xFFFF);
-		}
+		public static int HighWord(int number) => (number >> 16) & 0xFFFF;
 
 	}
 

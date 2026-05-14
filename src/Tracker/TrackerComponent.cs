@@ -6,14 +6,17 @@
  *        Telemetry is optional and must remain sanitized (no raw frame payloads, names, paths, or addresses).
  */
 
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Windows.Forms;
 
+using Grasshopper;
 using Grasshopper.Kernel;
 
 using OptiTrack.Core;
@@ -23,6 +26,8 @@ using OptiTrack.Telemetry;
 
 using Rhino;
 using Rhino.Geometry;
+
+using Timer = System.Threading.Timer;
 
 
 namespace Tracker {
@@ -37,45 +42,45 @@ namespace Tracker {
 	/// </remarks>
 	public class TrackerComponent : GH_Component {
 
-		private const int DefaultUpdateIntervalMs = 100;
+		const int DefaultUpdateIntervalMs = 100;
 
-		private static readonly object            sync = new object();
-		private static readonly LatestFrameBuffer frameBuffer = new LatestFrameBuffer();
-		private static readonly TrackerLogger     logger      = new TrackerLogger();
-		private static          ITelemetryService telemetry   = new NoOpTelemetryService();
-		private static          IOptiTrackClient  optiTrackClient = CreateClient(telemetry);
-		private static          OptiTrackFrame    currentFrame;
-		private static          DateTime          currentFrameReceivedUtc = DateTime.MinValue;
-		private static          DateTime          connectionStartedUtc    = DateTime.MinValue;
-		private static          bool              handlersAttached;
-		private static          bool              connectionConfirmed;
-		private static          bool              hasConnectedOnce;
-		private static          bool              telemetryEnabled;
-		private static          bool              isDeleted;
-		private static          bool              redrawEveryFrame;
-		private static          int               updateIntervalMs = DefaultUpdateIntervalMs;
-		private static          int               reconnectCount;
-		private static          long              droppedFrameCount;
-		private static          long              skippedFrameCount;
-		private static          Timer             updateTimer;
-		private static          DateTime          lastSolveUtc = DateTime.MinValue;
-		private static          DateTime          lastScheduledSolutionUtc = DateTime.MinValue;
-		private static          DateTime          lastFrameUtc = DateTime.MinValue;
-		private static          string                 selectedAdapterName = NatNet4OptiTrackClient.AdapterName;
-		private static          SdkCompatibilityReport compatibilityReport = NatNet4OptiTrackClient.BuildCompatibilityReport(OptiTrackConnectionType.Multicast);
+		static readonly object                 sync            = new object();
+		static readonly LatestFrameBuffer      frameBuffer     = new LatestFrameBuffer();
+		static readonly TrackerLogger          logger          = new TrackerLogger();
+		static          ITelemetryService      telemetry       = new NoOpTelemetryService();
+		static          IOptiTrackClient       optiTrackClient = CreateClient(telemetry);
+		static          OptiTrackFrame         currentFrame;
+		static          DateTime               currentFrameReceivedUtc = DateTime.MinValue;
+		static          DateTime               connectionStartedUtc    = DateTime.MinValue;
+		static          bool                   handlersAttached;
+		static          bool                   connectionConfirmed;
+		static          bool                   hasConnectedOnce;
+		static          bool                   telemetryEnabled;
+		static          bool                   isDeleted;
+		static          bool                   redrawEveryFrame;
+		static          int                    updateIntervalMs = DefaultUpdateIntervalMs;
+		static          int                    reconnectCount;
+		static          long                   droppedFrameCount;
+		static          long                   skippedFrameCount;
+		static          Timer                  updateTimer;
+		static          DateTime               lastSolveUtc             = DateTime.MinValue;
+		static          DateTime               lastScheduledSolutionUtc = DateTime.MinValue;
+		static          DateTime               lastFrameUtc             = DateTime.MinValue;
+		static          string                 selectedAdapterName      = NatNet4OptiTrackClient.AdapterName;
+		static          SdkCompatibilityReport compatibilityReport      = NatNet4OptiTrackClient.BuildCompatibilityReport(OptiTrackConnectionType.Multicast);
 
-		private static bool RigidBody;
-		private static bool Skeleton;
-		private static bool ForcePlate;
-		private static bool yUp;
+		static bool RigidBody;
+		static bool Skeleton;
+		static bool ForcePlate;
+		static bool yUp;
 
-		public static           List<string>    Log             = new List<string>();
-		protected static        List<Point3d>   mPoints         = new List<Point3d>();
-		protected static        List<string>    mLabels         = new List<string>();
-		private static readonly List<string>    rBodyNames      = new List<string>();
-		private static readonly List<Plane>     rBodyPlanes     = new List<Plane>();
-		private static readonly List<Transform> rBodyTransforms = new List<Transform>();
-		private static readonly List<string>    warnings        = new List<string>();
+		public static    List<string>    Log             = new List<string>();
+		protected static List<Point3d>   mPoints         = new List<Point3d>();
+		protected static List<string>    mLabels         = new List<string>();
+		static readonly  List<string>    rBodyNames      = new List<string>();
+		static readonly  List<Plane>     rBodyPlanes     = new List<Plane>();
+		static readonly  List<Transform> rBodyTransforms = new List<Transform>();
+		static readonly  List<string>    warnings        = new List<string>();
 
 
 		#region Construction
@@ -83,7 +88,12 @@ namespace Tracker {
 		/// <summary>
 		/// Initializes the OptiTrack stream component metadata.
 		/// </summary>
-		public TrackerComponent() : base("OptiTrack Stream", "OptiTrack Stream", "Connect to Motive over NatNet and stream OptiTrack data into Grasshopper.", "Tracker", "OptiTrack") { }
+		public TrackerComponent() : base(
+				"OptiTrack Stream",
+				"OptiTrack Stream",
+				"Connect to Motive over NatNet and stream OptiTrack data into Grasshopper.",
+				"Tracker",
+				"OptiTrack") { }
 
 
 		/// <summary>
@@ -91,20 +101,22 @@ namespace Tracker {
 		/// </summary>
 		/// <param name="telemetryService">Telemetry boundary service used by the adapter.</param>
 		/// <returns>Configured NatNet adapter instance.</returns>
-		private static IOptiTrackClient CreateClient(ITelemetryService telemetryService) {
+		static IOptiTrackClient CreateClient(ITelemetryService telemetryService) {
 			string mode = (Environment.GetEnvironmentVariable("TRACKER_NATNET_ADAPTER") ?? string.Empty).Trim();
 
-			if (string.Equals(mode, "latest", StringComparison.OrdinalIgnoreCase)
-				|| string.Equals(mode, "natnetlatest", StringComparison.OrdinalIgnoreCase)) {
+			if (string.Equals(mode, "latest", StringComparison.OrdinalIgnoreCase) || string.Equals(mode, "natnetlatest", StringComparison.OrdinalIgnoreCase)) {
 				selectedAdapterName = NatNetLatestOptiTrackClient.AdapterName;
+
 				return new NatNetLatestOptiTrackClient(telemetryService);
 			}
 
 			selectedAdapterName = NatNet4OptiTrackClient.AdapterName;
+
 			return new NatNet4OptiTrackClient(telemetryService);
 		}
 
 		#endregion
+
 
 		#region Grasshopper Metadata
 
@@ -118,10 +130,29 @@ namespace Tracker {
 			pManager.AddIntegerParameter("Data Port", "Data Port", "NatNet server data port.", GH_ParamAccess.item, 1511);
 			pManager.AddNumberParameter("Scale Factor", "Scale", "Additional scale factor applied to rigid body planes.", GH_ParamAccess.item, 1.0);
 			pManager.AddBooleanParameter("Y Up", "Y Up", "Apply the existing Y-up coordinate adjustment.", GH_ParamAccess.item, false);
-			pManager.AddIntegerParameter("Target Update Interval (ms)", "Interval", "Target component update interval in milliseconds.", GH_ParamAccess.item, DefaultUpdateIntervalMs);
-			pManager.AddBooleanParameter("Redraw Every Frame", "EveryFrame", "Advanced mode: schedule component solve on each incoming frame.", GH_ParamAccess.item, false);
+
+			pManager.AddIntegerParameter(
+					"Target Update Interval (ms)",
+					"Interval",
+					"Target component update interval in milliseconds.",
+					GH_ParamAccess.item,
+					DefaultUpdateIntervalMs);
+
+			pManager.AddBooleanParameter(
+					"Redraw Every Frame",
+					"EveryFrame",
+					"Advanced mode: schedule component solve on each incoming frame.",
+					GH_ParamAccess.item,
+					false);
+
 			pManager.AddBooleanParameter("Debug Logging", "Debug", "Show additional component runtime remarks.", GH_ParamAccess.item, false);
-			pManager.AddBooleanParameter("Enable Telemetry", "Telemetry", "Enable optional sanitized Sentry error/performance reporting when configured.", GH_ParamAccess.item, false);
+
+			pManager.AddBooleanParameter(
+					"Enable Telemetry",
+					"Telemetry",
+					"Enable optional sanitized Sentry error/performance reporting when configured.",
+					GH_ParamAccess.item,
+					false);
 		}
 
 
@@ -141,6 +172,7 @@ namespace Tracker {
 		}
 
 		#endregion
+
 
 		#region Solve Logic
 
@@ -173,14 +205,22 @@ namespace Tracker {
 			DA.GetData(12, ref enableTelemetry);
 
 			warnings.Clear();
-			yUp               = yUpInput;
-			updateIntervalMs  = Math.Max(10, targetIntervalMs);
-			redrawEveryFrame  = everyFrame;
+			yUp                 = yUpInput;
+			updateIntervalMs    = Math.Max(10, targetIntervalMs);
+			redrawEveryFrame    = everyFrame;
 			logger.DebugEnabled = debugLogging;
 			ConfigureTelemetry(enableTelemetry);
 
 			OptiTrackConnectionType connectionType = ParseConnectionType(connectionTypeText);
-			bool valid = ValidateConfiguration(localIP, serverIP, commandPort, dataPort, scaleFactor, targetIntervalMs, connectionTypeText);
+
+			bool valid = ValidateConfiguration(
+					localIP,
+					serverIP,
+					commandPort,
+					dataPort,
+					scaleFactor,
+					targetIntervalMs,
+					connectionTypeText);
 
 			foreach (string warning in warnings) {
 				AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, warning);
@@ -199,30 +239,55 @@ namespace Tracker {
 				AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Tracker client reset.");
 			}
 
-			if (connect && !connectionConfirmed) {
-				ConnectClient(localIP, serverIP, connectionType, commandPort, dataPort, scaleFactor, debugLogging);
-			}
-			else if (!connect && connectionConfirmed) {
-				DisconnectClient();
-				ClearFrameState();
-				logger.Info("Service stopped. Set Connect to true to begin streaming.");
+			switch (connect) {
+				case true when !connectionConfirmed:
+
+					TrackerComponent.ConnectClient(
+							localIP,
+							serverIP,
+							connectionType,
+							commandPort,
+							dataPort,
+							scaleFactor,
+							debugLogging);
+
+				break;
+
+				case false when connectionConfirmed:
+
+
+					TrackerComponent.DisconnectClient();
+
+					TrackerComponent.ClearFrameState();
+
+					logger.Info("Service stopped. Set Connect to true to begin streaming.");
+
+				break;
 			}
 
 			Stopwatch solveWatch = Stopwatch.StartNew();
+
 			using (telemetry.StartSpan("grasshopper.solve", new TelemetryContext().SetMetric("update_interval_ms", updateIntervalMs))) {
 				ConsumeLatestFrame(scaleFactor);
 			}
+
 			solveWatch.Stop();
-			telemetry.CaptureMessage("grasshopper.solve", TelemetrySeverity.Debug, new TelemetryContext().SetMetric("solve_duration_ms", solveWatch.Elapsed.TotalMilliseconds));
+
+			telemetry.CaptureMessage(
+					"grasshopper.solve",
+					TelemetrySeverity.Debug,
+					new TelemetryContext().SetMetric("solve_duration_ms", solveWatch.Elapsed.TotalMilliseconds));
 
 			lastSolveUtc = DateTime.UtcNow;
 			SetOutputs(DA);
 		}
+
 		#endregion
+
 
 		#region NatNet Connection
 
-		private void SetOutputs(IGH_DataAccess DA) {
+		void SetOutputs(IGH_DataAccess DA) {
 			try {
 				DA.SetDataList("Status", logger.Snapshot());
 				DA.SetDataList("Markers", mPoints);
@@ -230,9 +295,9 @@ namespace Tracker {
 				DA.SetDataList("RB Name", rBodyNames);
 				DA.SetDataList("BR Plane", rBodyPlanes);
 				DA.SetDataList("RB Transform", rBodyTransforms);
-				DA.SetData("Frame Number", currentFrame == null ? 0 : currentFrame.FrameNumber);
-				DA.SetData("Timestamp", currentFrame == null ? 0.0 : currentFrame.TimestampSeconds);
-				DA.SetData("Latency", currentFrame == null ? 0.0 : currentFrame.LatencySeconds);
+				DA.SetData("Frame Number", currentFrame?.FrameNumber ?? 0);
+				DA.SetData("Timestamp", currentFrame?.TimestampSeconds ?? 0.0);
+				DA.SetData("Latency", currentFrame?.LatencySeconds ?? 0.0);
 				DA.SetDataList("Warnings", warnings);
 				DA.SetDataList("Diagnostics", BuildDiagnostics());
 				DA.SetData("Telemetry Status", telemetry.Status);
@@ -244,7 +309,7 @@ namespace Tracker {
 		}
 
 
-		private static void ConfigureTelemetry(bool enableTelemetry) {
+		static void ConfigureTelemetry(bool enableTelemetry) {
 			if (telemetryEnabled == enableTelemetry) {
 				return;
 			}
@@ -256,8 +321,8 @@ namespace Tracker {
 		}
 
 
-		private static void ResetClient() {
-			if (optiTrackClient != null && handlersAttached) {
+		static void ResetClient() {
+			if ((optiTrackClient != null) && handlersAttached) {
 				optiTrackClient.FrameReceived     -= OnFrameReceived;
 				optiTrackClient.ConnectionChanged -= OnConnectionChanged;
 			}
@@ -267,7 +332,13 @@ namespace Tracker {
 		}
 
 
-		private static void ConnectClient(string localIP, string serverIP, OptiTrackConnectionType connectionType, int commandPort, int dataPort, double scaleFactor, bool debugLogging) {
+		static void ConnectClient(string                  localIP,
+								  string                  serverIP,
+								  OptiTrackConnectionType connectionType,
+								  int                     commandPort,
+								  int                     dataPort,
+								  double                  scaleFactor,
+								  bool                    debugLogging) {
 			EnsureClientHandlers();
 			logger.Clear();
 			logger.DebugEnabled = debugLogging;
@@ -294,6 +365,7 @@ namespace Tracker {
 			try {
 				optiTrackClient.ConnectAsync(options, CancellationToken.None).GetAwaiter().GetResult();
 				connectionConfirmed = optiTrackClient.IsConnected;
+
 				if (connectionConfirmed) {
 					// Reconnect counter intentionally excludes the first successful connect.
 					if (hasConnectedOnce) {
@@ -318,9 +390,10 @@ namespace Tracker {
 		}
 
 
-		private static void DisconnectClient() {
+		static void DisconnectClient() {
 			StopUpdateTimer();
-			if (optiTrackClient == null || !optiTrackClient.IsConnected) {
+
+			if ((optiTrackClient == null) || !optiTrackClient.IsConnected) {
 				connectionConfirmed = false;
 
 				return;
@@ -334,7 +407,7 @@ namespace Tracker {
 		}
 
 
-		private static void EnsureClientHandlers() {
+		static void EnsureClientHandlers() {
 			if (handlersAttached) {
 				return;
 			}
@@ -346,14 +419,16 @@ namespace Tracker {
 
 		#endregion
 
+
 		#region Frame Handling
 
-		private static void OnFrameReceived(object sender, OptiTrackFrameEventArgs e) {
-			if (e == null || e.Frame == null || isDeleted) {
+		static void OnFrameReceived(object sender, OptiTrackFrameEventArgs e) {
+			if ((e == null) || (e.Frame == null) || isDeleted) {
 				return;
 			}
 
 			DateTime now = DateTime.UtcNow;
+
 			// NatNet callback threads must not touch Grasshopper UI state directly.
 			frameBuffer.Write(e.Frame, now);
 			lastFrameUtc = now;
@@ -362,23 +437,24 @@ namespace Tracker {
 				ScheduleSolutionSoon();
 			}
 
-			telemetry.CaptureMessage("natnet.frame_received", TelemetrySeverity.Debug, new TelemetryContext()
-					.SetMetric("frame_count", frameBuffer.TotalReceived)
-					.SetMetric("rigid_body_count", e.Frame.RigidBodies == null ? 0 : e.Frame.RigidBodies.Count)
-					.SetMetric("marker_count", e.Frame.Markers == null ? 0 : e.Frame.Markers.Count));
+			telemetry.CaptureMessage(
+					"natnet.frame_received",
+					TelemetrySeverity.Debug,
+					new TelemetryContext().SetMetric("frame_count", frameBuffer.TotalReceived).SetMetric("rigid_body_count", e.Frame.RigidBodies?.Count ?? 0)
+										  .SetMetric("marker_count", e.Frame.Markers?.Count ?? 0));
 		}
 
 
-		private static void OnConnectionChanged(object sender, OptiTrackConnectionEventArgs e) {
+		static void OnConnectionChanged(object sender, OptiTrackConnectionEventArgs e) {
 			if (!string.IsNullOrWhiteSpace(e.Message)) {
 				logger.Info(e.Message);
 			}
 		}
 
 
-		private static void ClearFrameState() {
+		static void ClearFrameState() {
 			lock (sync) {
-				currentFrame = null;
+				currentFrame            = null;
 				currentFrameReceivedUtc = DateTime.MinValue;
 				mPoints.Clear();
 				mLabels.Clear();
@@ -390,7 +466,7 @@ namespace Tracker {
 		}
 
 
-		private static void ConsumeLatestFrame(double scaleFactor) {
+		static void ConsumeLatestFrame(double scaleFactor) {
 			using (telemetry.StartSpan("frame_buffer.consume", new TelemetryContext().SetMetric("frame_count", frameBuffer.TotalReceived))) {
 				if (!frameBuffer.TryConsumeLatest(out OptiTrackFrame frame, out DateTime receivedUtc, out bool skippedIntermediateFrames)) {
 					return;
@@ -400,7 +476,7 @@ namespace Tracker {
 					Interlocked.Increment(ref skippedFrameCount);
 				}
 
-				if (frame.FrameNumber == (currentFrame == null ? -1 : currentFrame.FrameNumber)) {
+				if (frame.FrameNumber == (currentFrame?.FrameNumber ?? -1)) {
 					Interlocked.Increment(ref droppedFrameCount);
 				}
 
@@ -412,14 +488,16 @@ namespace Tracker {
 
 		#endregion
 
+
 		#region Geometry Conversion
 
-		private static void ProcessFrameData(OptiTrackFrame frame, double scaleFactor) {
+		static void ProcessFrameData(OptiTrackFrame frame, double scaleFactor) {
 			if (frame == null) {
 				return;
 			}
 
 			Stopwatch conversionWatch = Stopwatch.StartNew();
+
 			using (telemetry.StartSpan("grasshopper.geometry_conversion", new TelemetryContext())) {
 				mPoints.Clear();
 				mLabels.Clear();
@@ -433,62 +511,71 @@ namespace Tracker {
 				}
 
 				if (RigidBody) {
-					foreach (OptiTrackRigidBody rigidBody in frame.RigidBodies) {
-						if (!rigidBody.IsTracked) {
-							continue;
-						}
-
+					foreach (OptiTrackRigidBody rigidBody in frame.RigidBodies.Where(rigidBody => rigidBody.IsTracked)) {
 						rBodyNames.Add(rigidBody.Name);
-						Plane plane = CreateRigidBodyPlane(rigidBody, scaleFactor);
+
+						Plane plane = TrackerComponent.CreateRigidBodyPlane(rigidBody, scaleFactor);
+
 						rBodyPlanes.Add(plane);
+
 						rBodyTransforms.Add(Transform.PlaneToPlane(Plane.WorldXY, plane));
 					}
 				}
 			}
+
 			conversionWatch.Stop();
-			telemetry.CaptureMessage("grasshopper.geometry_conversion", TelemetrySeverity.Debug, new TelemetryContext().SetMetric("conversion_duration_ms", conversionWatch.Elapsed.TotalMilliseconds));
+
+			telemetry.CaptureMessage(
+					"grasshopper.geometry_conversion",
+					TelemetrySeverity.Debug,
+					new TelemetryContext().SetMetric("conversion_duration_ms", conversionWatch.Elapsed.TotalMilliseconds));
 		}
 
 		#endregion
 
+
 		#region Scheduling
 
-		private static void StartUpdateTimer() {
+		static void StartUpdateTimer() {
 			StopUpdateTimer();
 			updateTimer = new Timer(_ => ScheduleSolutionSoon(), null, updateIntervalMs, updateIntervalMs);
 		}
 
-		private static void StopUpdateTimer() {
+
+		static void StopUpdateTimer() {
 			updateTimer?.Dispose();
 			updateTimer = null;
 		}
 
 
-		private static void ScheduleSolutionSoon() {
+		static void ScheduleSolutionSoon() {
 			if (isDeleted) {
 				return;
 			}
 
 			DateTime now = DateTime.UtcNow;
-			if (!redrawEveryFrame && now.Subtract(lastScheduledSolutionUtc).TotalMilliseconds < updateIntervalMs * 0.8) {
+
+			if (!redrawEveryFrame && (now.Subtract(lastScheduledSolutionUtc).TotalMilliseconds < updateIntervalMs * 0.8)) {
 				return;
 			}
 
 			lastScheduledSolutionUtc = now;
 
-			var doc = Instances.ActiveCanvas?.Document;
+			GH_Document doc = Instances.ActiveCanvas?.Document;
+
 			// ScheduleSolution marshals work back through the document solve loop instead of expiring from callback threads.
 			doc?.ScheduleSolution(1, _ => { Instances.ActiveCanvas?.Document?.ExpireSolution(); });
 		}
 
 		#endregion
 
+
 		#region Diagnostics and Telemetry
 
-		private static List<string> BuildDiagnostics() {
-			List<string> lines = new List<string>();
-			TimeSpan uptime = connectionStartedUtc == DateTime.MinValue ? TimeSpan.Zero : DateTime.UtcNow.Subtract(connectionStartedUtc);
-			double ageMs = currentFrameReceivedUtc == DateTime.MinValue ? 0.0 : DateTime.UtcNow.Subtract(currentFrameReceivedUtc).TotalMilliseconds;
+		static List<string> BuildDiagnostics() {
+			List<string> lines  = new List<string>();
+			TimeSpan     uptime = connectionStartedUtc == DateTime.MinValue ? TimeSpan.Zero : DateTime.UtcNow.Subtract(connectionStartedUtc);
+			double       ageMs  = currentFrameReceivedUtc == DateTime.MinValue ? 0.0 : DateTime.UtcNow.Subtract(currentFrameReceivedUtc).TotalMilliseconds;
 			lines.Add("status=" + (connectionConfirmed ? "connected" : "disconnected"));
 			lines.Add("telemetry_status=" + telemetry.Status);
 			lines.Add("frames_received=" + frameBuffer.TotalReceived);
@@ -502,18 +589,19 @@ namespace Tracker {
 			lines.Add("last_solve_timestamp_utc=" + (lastSolveUtc == DateTime.MinValue ? "n/a" : lastSolveUtc.ToString("O")));
 			lines.AddRange(compatibilityReport.ToDiagnosticsLines());
 
-			telemetry.CaptureMessage("diagnostics", TelemetrySeverity.Debug, new TelemetryContext()
-					.SetMetric("frame_count", frameBuffer.TotalReceived)
-					.SetMetric("skipped_frame_count", Interlocked.Read(ref skippedFrameCount))
-					.SetMetric("dropped_frame_count", Interlocked.Read(ref droppedFrameCount))
-					.SetMetric("buffer_age_ms", ageMs)
-					.SetMetric("reconnect_count", reconnectCount));
+			telemetry.CaptureMessage(
+					"diagnostics",
+					TelemetrySeverity.Debug,
+					new TelemetryContext().SetMetric("frame_count", frameBuffer.TotalReceived)
+										  .SetMetric("skipped_frame_count", Interlocked.Read(ref skippedFrameCount))
+										  .SetMetric("dropped_frame_count", Interlocked.Read(ref droppedFrameCount)).SetMetric("buffer_age_ms", ageMs)
+										  .SetMetric("reconnect_count", reconnectCount));
 
 			return lines;
 		}
 
 
-		private static void EmitCompatibilityTelemetry(SdkCompatibilityReport report) {
+		static void EmitCompatibilityTelemetry(SdkCompatibilityReport report) {
 			if (report == null) {
 				return;
 			}
@@ -521,63 +609,60 @@ namespace Tracker {
 			telemetry.CaptureMessage(
 					"sdk.compatibility",
 					TelemetrySeverity.Debug,
-					new TelemetryContext().SetTag("adapter_name", report.AdapterName)
-										  .SetTag("adapter_version", report.AdapterVersion)
+					new TelemetryContext().SetTag("adapter_name", report.AdapterName).SetTag("adapter_version", report.AdapterVersion)
 										  .SetTag("loaded_natnet_assembly", report.LoadedNatNetAssembly)
 										  .SetTag("natnet_assembly_version", report.NatNetAssemblyVersion)
-										  .SetTag("supported_sdk_version", report.SupportedSdkVersion)
-										  .SetTag("sdk_load_result", report.SdkLoadResult)
-										  .SetTag("plugin_version", report.PluginVersion)
-										  .SetTag("rhino_major_version", ParseRhinoMajor(report.RhinoVersion))
-										  .SetTag("grasshopper_version", report.GrasshopperVersion)
-										  .SetTag("connection_mode", report.ConnectionMode)
-										  .SetTag("frame_schema_version", report.FrameSchemaVersion)
-										  .SetTag("sdk_exception_type", string.IsNullOrWhiteSpace(report.SdkExceptionType) ? "none" : report.SdkExceptionType));
+										  .SetTag("supported_sdk_version", report.SupportedSdkVersion).SetTag("sdk_load_result", report.SdkLoadResult)
+										  .SetTag("plugin_version", report.PluginVersion).SetTag("rhino_major_version", ParseRhinoMajor(report.RhinoVersion))
+										  .SetTag("grasshopper_version", report.GrasshopperVersion).SetTag("connection_mode", report.ConnectionMode)
+										  .SetTag("frame_schema_version", report.FrameSchemaVersion).SetTag(
+												   "sdk_exception_type",
+												   string.IsNullOrWhiteSpace(report.SdkExceptionType) ? "none" : report.SdkExceptionType));
 		}
 
 
-		private static SdkCompatibilityReport BuildCompatibilityReport(OptiTrackConnectionType connectionType) {
-			if (string.Equals(selectedAdapterName, NatNetLatestOptiTrackClient.AdapterName, StringComparison.OrdinalIgnoreCase)) {
-				return NatNetLatestOptiTrackClient.BuildCompatibilityReport(connectionType);
-			}
-
-			return NatNet4OptiTrackClient.BuildCompatibilityReport(connectionType);
-		}
+		static SdkCompatibilityReport BuildCompatibilityReport(OptiTrackConnectionType connectionType) =>
+				string.Equals(selectedAdapterName, NatNetLatestOptiTrackClient.AdapterName, StringComparison.OrdinalIgnoreCase)
+						? NatNetLatestOptiTrackClient.BuildCompatibilityReport(connectionType)
+						: NatNet4OptiTrackClient.BuildCompatibilityReport(connectionType);
 
 
-		private static string ParseRhinoMajor(string rhinoVersion) {
+		static string ParseRhinoMajor(string rhinoVersion) {
 			if (string.IsNullOrWhiteSpace(rhinoVersion)) {
 				return "unknown";
 			}
 
 			int split = rhinoVersion.IndexOf('.');
+
 			return split > 0 ? rhinoVersion.Substring(0, split) : rhinoVersion;
 		}
 
 		#endregion
 
+
 		#region Helpers
 
-		private static void AddRuntimeMessageToActiveInstances(string message, GH_RuntimeMessageLevel level) {
+		static void AddRuntimeMessageToActiveInstances(string message, GH_RuntimeMessageLevel level) {
 			IList<IGH_DocumentObject> objects = Instances.ActiveCanvas?.Document?.Objects;
+
 			if (objects == null) {
 				return;
 			}
 
-			foreach (IGH_DocumentObject obj in objects) {
-				TrackerComponent component = obj as TrackerComponent;
+			foreach (TrackerComponent component in objects.Select(obj => obj as TrackerComponent)) {
 				component?.AddRuntimeMessage(level, message);
 			}
 		}
 
 
-		private static Plane CreateRigidBodyPlane(OptiTrackRigidBody rigidBody, double scaleFactor) {
+		static Plane CreateRigidBodyPlane(OptiTrackRigidBody rigidBody, double scaleFactor) {
 			Quaternion rbQuat = new Quaternion(rigidBody.Qw, rigidBody.Qx, rigidBody.Qy, rigidBody.Qz);
 			rbQuat.GetRotation(out Plane rbPlane);
 			rbPlane.Origin = new Point3d(rigidBody.X, rigidBody.Y, rigidBody.Z);
 
-			var doc = RhinoDoc.ActiveDoc;
-			if (doc != null && doc.ModelUnitSystem == UnitSystem.Millimeters) {
+			RhinoDoc doc = RhinoDoc.ActiveDoc;
+
+			if ((doc != null) && (doc.ModelUnitSystem == UnitSystem.Millimeters)) {
 				rbPlane.Transform(Transform.Scale(new Point3d(0, 0, 0), 1000));
 			}
 
@@ -586,13 +671,13 @@ namespace Tracker {
 			}
 
 			if (yUp) {
-				Transform xformYup = Transform.Identity;
+				Transform xformYup          = Transform.Identity;
 				xformYup.M00 = xformYup.M21 = xformYup.M33 = 1;
 				xformYup.M12 = -1;
 				rbPlane.Transform(xformYup);
 			}
 
-			Transform xRotate = Transform.Identity;
+			Transform xRotate         = Transform.Identity;
 			xRotate.M10 = xRotate.M22 = xRotate.M33 = 1;
 			xRotate.M01 = -1;
 			rbPlane.Transform(xRotate);
@@ -601,19 +686,59 @@ namespace Tracker {
 		}
 
 
-		private bool ValidateConfiguration(string localIP, string serverIP, int commandPort, int dataPort, double scaleFactor, int targetInterval, string connectionTypeText) {
+		bool ValidateConfiguration(string localIP,
+								   string serverIP,
+								   int    commandPort,
+								   int    dataPort,
+								   double scaleFactor,
+								   int    targetInterval,
+								   string connectionTypeText) {
 			bool valid = true;
-			if (!IPAddress.TryParse(localIP, out _)) { warnings.Add("Local IP address is invalid."); valid = false; }
-			if (!IPAddress.TryParse(serverIP, out _)) { warnings.Add("Server IP address is invalid."); valid = false; }
-			if (!IsValidPort(commandPort)) { warnings.Add("Command port must be between 1 and 65535."); valid = false; }
-			if (!IsValidPort(dataPort)) { warnings.Add("Data port must be between 1 and 65535."); valid = false; }
-			if (commandPort == dataPort) { warnings.Add("Command port and data port should be different."); valid = false; }
-			if (scaleFactor <= 0) { warnings.Add("Scale factor must be greater than zero."); valid = false; }
-			if (targetInterval < 1) { warnings.Add("Target update interval must be 1 ms or greater."); valid = false; }
-			if (ParseConnectionType(connectionTypeText) == OptiTrackConnectionType.Multicast && !IsMulticastText(connectionTypeText)) {
+
+			if (!IPAddress.TryParse(localIP, out _)) {
+				warnings.Add("Local IP address is invalid.");
+				valid = false;
+			}
+
+			if (!IPAddress.TryParse(serverIP, out _)) {
+				warnings.Add("Server IP address is invalid.");
+				valid = false;
+			}
+
+			if (!IsValidPort(commandPort)) {
+				warnings.Add("Command port must be between 1 and 65535.");
+				valid = false;
+			}
+
+			if (!IsValidPort(dataPort)) {
+				warnings.Add("Data port must be between 1 and 65535.");
+				valid = false;
+			}
+
+			if (commandPort == dataPort) {
+				warnings.Add("Command port and data port should be different.");
+				valid = false;
+			}
+
+			if (scaleFactor <= 0) {
+				warnings.Add("Scale factor must be greater than zero.");
+				valid = false;
+			}
+
+			if (targetInterval < 1) {
+				warnings.Add("Target update interval must be 1 ms or greater.");
+				valid = false;
+			}
+
+			if ((ParseConnectionType(connectionTypeText) == OptiTrackConnectionType.Multicast) && !IsMulticastText(connectionTypeText)) {
 				warnings.Add("Connection type was not recognized. Using Multicast.");
 			}
-			if (!NatNetDependenciesPresent()) { warnings.Add("NatNetML.dll or NatNetLib.dll is missing from the plugin output folder."); valid = false; }
+
+			if (!NatNetDependenciesPresent()) {
+				warnings.Add("NatNetML.dll or NatNetLib.dll is missing from the plugin output folder.");
+				valid = false;
+			}
+
 			if (telemetryEnabled && telemetry.Status.StartsWith("disabled", StringComparison.OrdinalIgnoreCase)) {
 				warnings.Add("Telemetry was enabled, but Sentry is not configured. Set SENTRY_DSN or tracker.telemetry.local.json to activate it.");
 			}
@@ -621,22 +746,36 @@ namespace Tracker {
 			return valid;
 		}
 
-		private static bool IsValidPort(int port) { return port >= 1 && port <= 65535; }
 
-		private static bool NatNetDependenciesPresent() {
+		static bool IsValidPort(int port) => (port >= 1) && (port <= 65535);
+
+
+		static bool NatNetDependenciesPresent() {
 			string assemblyLocation = typeof(TrackerComponent).Assembly.Location;
-			string baseDirectory = string.IsNullOrWhiteSpace(assemblyLocation) ? AppDomain.CurrentDomain.BaseDirectory : Path.GetDirectoryName(assemblyLocation);
-			return File.Exists(Path.Combine(baseDirectory, "NatNetML.dll")) && File.Exists(Path.Combine(baseDirectory, "NatNetLib.dll"));
+
+			string baseDirectory = string.IsNullOrWhiteSpace(assemblyLocation)
+					? AppDomain.CurrentDomain.BaseDirectory
+					: Path.GetDirectoryName(assemblyLocation);
+
+			return (baseDirectory != null)
+				   && File.Exists(Path.Combine(baseDirectory, "NatNetML.dll"))
+				   && File.Exists(Path.Combine(baseDirectory, "NatNetLib.dll"));
 		}
 
-		private static OptiTrackConnectionType ParseConnectionType(string value) { return string.Equals(value, "Unicast", StringComparison.OrdinalIgnoreCase) ? OptiTrackConnectionType.Unicast : OptiTrackConnectionType.Multicast; }
 
-		private static bool IsMulticastText(string value) { return string.Equals(value, "Multicast", StringComparison.OrdinalIgnoreCase); }
+		static OptiTrackConnectionType ParseConnectionType(string value) => string.Equals(value, "Unicast", StringComparison.OrdinalIgnoreCase)
+				? OptiTrackConnectionType.Unicast
+				: OptiTrackConnectionType.Multicast;
+
+
+		static bool IsMulticastText(string value) => string.Equals(value, "Multicast", StringComparison.OrdinalIgnoreCase);
+
 		#endregion
+
 
 		#region Disposal and Menu
 
-		protected override void RemovedFromDocument(GH_Document document) {
+		public override void RemovedFromDocument(GH_Document document) {
 			isDeleted = true;
 			DisconnectClient();
 			base.RemovedFromDocument(document);
@@ -644,20 +783,46 @@ namespace Tracker {
 
 
 		protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu) {
-			Menu_AppendItem(menu, "Y up", Menu_yUp, true, yUp).ToolTipText = "When checked, component will expect Y up";
-			Menu_AppendItem(menu, "Rigid Body", Menu_rBodyClick, true, RigidBody).ToolTipText = "When checked, component will stream Rigid Body data.";
-			Menu_AppendItem(menu, "Skeleton", Menu_skeletonClick, true, Skeleton).ToolTipText = "When checked, component will stream Skeleton data.";
+			Menu_AppendItem(menu, "Y up", Menu_yUp, true, yUp).ToolTipText                       = "When checked, component will expect Y up";
+			Menu_AppendItem(menu, "Rigid Body", Menu_rBodyClick, true, RigidBody).ToolTipText    = "When checked, component will stream Rigid Body data.";
+			Menu_AppendItem(menu, "Skeleton", Menu_skeletonClick, true, Skeleton).ToolTipText    = "When checked, component will stream Skeleton data.";
 			Menu_AppendItem(menu, "Force Plate", Menu_fPlateClick, true, ForcePlate).ToolTipText = "When checked, component will stream Force Plate data.";
 		}
 
-		private void Menu_yUp(object sender, EventArgs e) { RecordUndoEvent("Y Up"); yUp = !yUp; ExpireSolution(true); }
-		private void Menu_rBodyClick(object sender, EventArgs e) { RecordUndoEvent("Rigid Body"); RigidBody = !RigidBody; ExpireSolution(true); }
-		private void Menu_skeletonClick(object sender, EventArgs e) { RecordUndoEvent("Skeleton"); Skeleton = !Skeleton; ExpireSolution(true); }
-		private void Menu_fPlateClick(object sender, EventArgs e) { RecordUndoEvent("Force Plate"); ForcePlate = !ForcePlate; ExpireSolution(true); }
 
-		protected override System.Drawing.Bitmap Icon { get { return Properties.Icons.Tracker; } }
-		public override Guid ComponentGuid { get { return new Guid("D1C724B2-FEB4-405E-9570-382F8FD553F8"); } }
+		void Menu_yUp(object sender, EventArgs e) {
+			RecordUndoEvent("Y Up");
+			yUp = !yUp;
+			ExpireSolution(true);
+		}
+
+
+		void Menu_rBodyClick(object sender, EventArgs e) {
+			RecordUndoEvent("Rigid Body");
+			RigidBody = !RigidBody;
+			ExpireSolution(true);
+		}
+
+
+		void Menu_skeletonClick(object sender, EventArgs e) {
+			RecordUndoEvent("Skeleton");
+			Skeleton = !Skeleton;
+			ExpireSolution(true);
+		}
+
+
+		void Menu_fPlateClick(object sender, EventArgs e) {
+			RecordUndoEvent("Force Plate");
+			ForcePlate = !ForcePlate;
+			ExpireSolution(true);
+		}
+
+
+		protected override System.Drawing.Bitmap Icon          { get { return Properties.Icons.Tracker; } }
+		public override    Guid                  ComponentGuid { get { return new Guid("D1C724B2-FEB4-405E-9570-382F8FD553F8"); } }
+
 		#endregion
+
 	}
 
 }

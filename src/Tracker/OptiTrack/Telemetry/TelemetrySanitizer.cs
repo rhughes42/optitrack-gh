@@ -20,12 +20,12 @@ namespace OptiTrack.Telemetry {
 	/// </remarks>
 	public static class TelemetrySanitizer {
 
-		private static readonly Regex IPv4Pattern        = new Regex(@"\b(?:\d{1,3}\.){3}\d{1,3}\b", RegexOptions.Compiled);
-		private static readonly Regex IPv6Pattern        = new Regex(@"\b(?:[A-F0-9]{1,4}:){2,7}[A-F0-9]{1,4}\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-		private static readonly Regex WindowsPathPattern = new Regex(@"[A-Za-z]:\\[^\s]+", RegexOptions.Compiled);
-		private static readonly Regex EmailPattern       = new Regex(@"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+		static readonly Regex IPv4Pattern        = new Regex(@"\b(?:\d{1,3}\.){3}\d{1,3}\b", RegexOptions.Compiled);
+		static readonly Regex IPv6Pattern        = new Regex(@"\b(?:[A-F0-9]{1,4}:){2,7}[A-F0-9]{1,4}\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+		static readonly Regex WindowsPathPattern = new Regex(@"[A-Za-z]:\\[^\s]+", RegexOptions.Compiled);
+		static readonly Regex EmailPattern       = new Regex(@"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-		private static readonly HashSet<string> SensitiveKeyParts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+		static readonly HashSet<string> SensitiveKeyParts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
 				"address",
 				"body",
 				"capture",
@@ -49,7 +49,7 @@ namespace OptiTrack.Telemetry {
 				"project_name"
 		};
 		// Explicitly allowed low-cardinality keys that remain safe even if they contain sensitive substrings (for example marker_count).
-		private static readonly HashSet<string> SafeKeyAllowList = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+		static readonly HashSet<string> SafeKeyAllowList = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
 				"adapter_name",
 				"adapter_version",
 				"buffer_age_ms",

@@ -6,6 +6,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 using Sentry;
@@ -22,11 +23,11 @@ namespace OptiTrack.Telemetry {
 	/// </remarks>
 	public sealed class SentryTelemetryService : ITelemetryService, IDisposable {
 
-		private readonly IDisposable sentry;
-		private          bool        disposed;
+		readonly IDisposable sentry;
+		bool                 disposed;
 
 
-		private SentryTelemetryService(IDisposable sentry, string status) {
+		SentryTelemetryService(IDisposable sentry, string status) {
 			this.sentry = sentry;
 			Status      = status;
 		}
@@ -141,9 +142,7 @@ namespace OptiTrack.Telemetry {
 		/// <param name="operationName">Operation identifier.</param>
 		/// <param name="context">Optional telemetry context.</param>
 		/// <returns>Disposable telemetry scope.</returns>
-		public TelemetryScope StartSpan(string operationName, TelemetryContext context) {
-			return new TelemetryScope(this, operationName, context);
-		}
+		public TelemetryScope StartSpan(string operationName, TelemetryContext context) => new TelemetryScope(this, operationName, context);
 
 
 		/// <summary>
@@ -159,12 +158,12 @@ namespace OptiTrack.Telemetry {
 		}
 
 
-		private static void ApplyContext(Scope scope, TelemetryContext context) {
+		static void ApplyContext(Scope scope, TelemetryContext context) {
 			if (context == null) {
 				return;
 			}
 
-			foreach (var tag in context.Tags) {
+			foreach (KeyValuePair<string, string> tag in context.Tags) {
 				if (TelemetrySanitizer.IsSensitiveKey(tag.Key)) {
 					continue;
 				}
@@ -172,7 +171,7 @@ namespace OptiTrack.Telemetry {
 				scope.SetTag(TelemetrySanitizer.SanitizeKey(tag.Key), TelemetrySanitizer.SanitizeValue(tag.Value));
 			}
 
-			foreach (var metric in context.Metrics) {
+			foreach (KeyValuePair<string, double> metric in context.Metrics) {
 				if (TelemetrySanitizer.IsSensitiveKey(metric.Key)) {
 					continue;
 				}
@@ -182,7 +181,7 @@ namespace OptiTrack.Telemetry {
 		}
 
 
-		private static double? ClampSampleRate(double? sampleRate) {
+		static double? ClampSampleRate(double? sampleRate) {
 			if (!sampleRate.HasValue) {
 				return null;
 			}
@@ -191,7 +190,7 @@ namespace OptiTrack.Telemetry {
 		}
 
 
-		private static SentryLevel ToSentryLevel(TelemetrySeverity severity) {
+		static SentryLevel ToSentryLevel(TelemetrySeverity severity) {
 			switch (severity) {
 				case TelemetrySeverity.Debug: return SentryLevel.Debug;
 
@@ -206,12 +205,10 @@ namespace OptiTrack.Telemetry {
 		}
 
 
-		private static string GetPluginVersion() {
-			return typeof(SentryTelemetryService).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
-		}
+		static string GetPluginVersion() => typeof(SentryTelemetryService).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown";
 
 
-		private static string GetRhinoMajorVersion() {
+		static string GetRhinoMajorVersion() {
 			try {
 				string version = Rhino.RhinoApp.Version.ToString();
 				int    split   = version.IndexOf('.');
@@ -223,7 +220,7 @@ namespace OptiTrack.Telemetry {
 		}
 
 
-		private static string ResolveAdapterName() {
+		static string ResolveAdapterName() {
 			string mode = Environment.GetEnvironmentVariable("TRACKER_NATNET_ADAPTER") ?? string.Empty;
 			if (string.Equals(mode, "latest", StringComparison.OrdinalIgnoreCase)
 				|| string.Equals(mode, "natnetlatest", StringComparison.OrdinalIgnoreCase)) {

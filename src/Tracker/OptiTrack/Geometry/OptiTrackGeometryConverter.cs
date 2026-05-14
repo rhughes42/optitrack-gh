@@ -66,9 +66,7 @@ namespace OptiTrack.Geometry {
 		}
 
 
-		public static Transform BuildCalibrationTransform(Plane sourcePlane, Plane targetPlane) {
-			return Transform.PlaneToPlane(sourcePlane, targetPlane);
-		}
+		public static Transform BuildCalibrationTransform(Plane sourcePlane, Plane targetPlane) => Transform.PlaneToPlane(sourcePlane, targetPlane);
 
 
 		public static Plane ApplyCalibration(Plane inputPlane, Transform calibrationTransform) {
@@ -79,7 +77,7 @@ namespace OptiTrack.Geometry {
 		}
 
 
-		private static void ApplyScale(ref Plane plane, double scaleFactor) {
+		static void ApplyScale(ref Plane plane, double scaleFactor) {
 			if (Math.Abs(scaleFactor - 1.0) <= 0.000001) {
 				return;
 			}
@@ -88,7 +86,7 @@ namespace OptiTrack.Geometry {
 		}
 
 
-		private static void ApplyWorldTransform(ref Plane plane, Transform worldTransform) {
+		static void ApplyWorldTransform(ref Plane plane, Transform worldTransform) {
 			if (worldTransform == Transform.Identity) {
 				return;
 			}
@@ -97,8 +95,8 @@ namespace OptiTrack.Geometry {
 		}
 
 
-		private static void ApplyAxisRemap(ref Plane plane, bool yUp, AxisRemapMode axisRemapMode) {
-			if (yUp || axisRemapMode == AxisRemapMode.ZUpToYUp) {
+		static void ApplyAxisRemap(ref Plane plane, bool yUp, AxisRemapMode axisRemapMode) {
+			if (yUp || (axisRemapMode == AxisRemapMode.ZUpToYUp)) {
 				Transform yUpTransform = Transform.Identity;
 				yUpTransform.M00 = 1;
 				yUpTransform.M11 = 0;
@@ -117,7 +115,7 @@ namespace OptiTrack.Geometry {
 		}
 
 
-		private static void ApplyAxisRemap(ref Point3d point, AxisRemapMode axisRemapMode) {
+		static void ApplyAxisRemap(ref Point3d point, AxisRemapMode axisRemapMode) {
 			if (axisRemapMode == AxisRemapMode.None) {
 				return;
 			}

@@ -64,7 +64,7 @@ namespace OptiTrack.Telemetry {
 		}
 
 
-		private static void LoadLocalFile(SentryTelemetryOptions options) {
+		static void LoadLocalFile(SentryTelemetryOptions options) {
 			string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tracker.telemetry.local.json");
 
 			if (!File.Exists(path)) {
@@ -78,7 +78,7 @@ namespace OptiTrack.Telemetry {
 
 			JToken tracesSampleRate = json["SENTRY_TRACES_SAMPLE_RATE"];
 
-			if (tracesSampleRate != null
+			if ((tracesSampleRate != null)
 				&& double.TryParse(tracesSampleRate.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out double sampleRate)) {
 				options.TracesSampleRate = sampleRate;
 			}
@@ -89,12 +89,10 @@ namespace OptiTrack.Telemetry {
 		/// Determines whether the current DSN value appears usable.
 		/// </summary>
 		/// <returns>True when a non-empty absolute URI DSN is available.</returns>
-		public bool HasValidDsn() {
-			return !string.IsNullOrWhiteSpace(Dsn) && Uri.TryCreate(Dsn, UriKind.Absolute, out _);
-		}
+		public bool HasValidDsn() => !string.IsNullOrWhiteSpace(Dsn) && Uri.TryCreate(Dsn, UriKind.Absolute, out _);
 
 
-		private static string BuildDefaultReleaseName() {
+		static string BuildDefaultReleaseName() {
 			string version = typeof(SentryTelemetryOptions).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "1.11.0";
 			return "optitrack-gh@" + version;
 		}

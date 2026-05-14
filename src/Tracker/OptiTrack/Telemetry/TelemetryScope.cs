@@ -16,11 +16,11 @@ namespace OptiTrack.Telemetry {
 	/// </summary>
 	public sealed class TelemetryScope : IDisposable {
 
-		private readonly ITelemetryService telemetryService;
-		private readonly string            operationName;
-		private readonly TelemetryContext  context;
-		private readonly Stopwatch         stopwatch;
-		private          bool              disposed;
+		readonly ITelemetryService telemetryService;
+		readonly string            operationName;
+		readonly TelemetryContext  context;
+		readonly Stopwatch         stopwatch;
+		bool                       disposed;
 
 
 		/// <summary>

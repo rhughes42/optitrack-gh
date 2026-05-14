@@ -78,8 +78,8 @@ namespace Tracker.Components {
 					List<Plane>  filteredPlanes = new List<Plane>();
 
 					for (int i = 0; i < names.Count; i++) {
-						bool includeMatch = include == null || include.IsMatch(names[i]);
-						bool excludeMatch = exclude != null && exclude.IsMatch(names[i]);
+						bool includeMatch = (include == null) || include.IsMatch(names[i]);
+						bool excludeMatch = (exclude != null) && exclude.IsMatch(names[i]);
 
 						if (includeMatch && !excludeMatch) {
 							filteredNames.Add(names[i]);

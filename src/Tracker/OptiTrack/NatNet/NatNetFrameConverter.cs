@@ -18,7 +18,7 @@ namespace OptiTrack.NatNet {
 	/// <summary>
 	/// Conversion utilities from NatNet SDK frame payloads into <see cref="OptiTrackFrame"/>.
 	/// </summary>
-	internal static class NatNetFrameConverter {
+	static class NatNetFrameConverter {
 
 		/// <summary>
 		/// Builds a transport-neutral frame model from NatNet SDK frame data.
@@ -80,16 +80,15 @@ namespace OptiTrack.NatNet {
 				}
 			}
 
-			return new OptiTrackFrame {
-					FrameNumber      = data.iFrame,
-					TimestampSeconds = data.fTimestamp,
-					LatencySeconds   = client.SecondsSinceHostTimestamp(data.TransmitTimestamp),
-					IsRecording      = data.bRecording,
-					AssetsChanged    = data.bTrackingModelsChanged,
-					Markers          = markers,
-					RigidBodies      = rigidBodies,
-					StatusMessages   = statusMessages
-			};
+			return new OptiTrackFrame(
+					frameNumber: data.iFrame,
+					timestampSeconds: data.fTimestamp,
+					latencySeconds: client.SecondsSinceHostTimestamp(data.TransmitTimestamp),
+					isRecording: data.bRecording,
+					assetsChanged: data.bTrackingModelsChanged,
+					markers: markers,
+					rigidBodies: rigidBodies,
+					statusMessages: statusMessages);
 		}
 
 	}

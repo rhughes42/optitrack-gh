@@ -16,8 +16,8 @@ namespace OptiTrack.Core {
 	/// </summary>
 	public sealed class TrackerLogger {
 
-		private readonly object       sync    = new object();
-		private readonly List<string> entries = new List<string>();
+		readonly object       sync    = new object();
+		readonly List<string> entries = new List<string>();
 
 		/// <summary>
 		/// Gets or sets whether debug messages should be emitted.
@@ -77,7 +77,7 @@ namespace OptiTrack.Core {
 		}
 
 
-		private void Add(string level, string message) {
+		void Add(string level, string message) {
 			if (string.IsNullOrWhiteSpace(message)) {
 				return;
 			}

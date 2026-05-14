@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
@@ -57,8 +58,7 @@ namespace Tracker.Components {
 				try {
 					List<IGH_GeometricGoo> output = new List<IGH_GeometricGoo>(geometry.Count);
 
-					for (int i = 0; i < geometry.Count; i++) {
-						IGH_GeometricGoo duplicate = geometry[i].DuplicateGeometry();
+					foreach (IGH_GeometricGoo duplicate in geometry.Select(t => t.DuplicateGeometry())) {
 						duplicate.Transform(transform);
 						output.Add(duplicate);
 					}

@@ -43,9 +43,7 @@ namespace Tracker.Components {
 				return;
 			}
 
-			OptiTrackRecording recording = recordingValue as OptiTrackRecording;
-
-			if (recording == null) {
+			if (!(recordingValue is OptiTrackRecording recording)) {
 				AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input is not a valid OptiTrack recording object.");
 
 				return;

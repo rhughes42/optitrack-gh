@@ -74,12 +74,7 @@ namespace Tracker.Components {
 		}
 
 
-		private static AxisRemapMode ParseAxisRemapMode(string value) {
-			AxisRemapMode mode;
-
-			return Enum.TryParse(value, true, out mode) ? mode : AxisRemapMode.None;
-		}
-
+		static AxisRemapMode ParseAxisRemapMode(string value) => Enum.TryParse(value, true, out AxisRemapMode mode) ? mode : AxisRemapMode.None;
 
 		protected override System.Drawing.Bitmap Icon {
 			get { return Properties.Icons.Tracker; }

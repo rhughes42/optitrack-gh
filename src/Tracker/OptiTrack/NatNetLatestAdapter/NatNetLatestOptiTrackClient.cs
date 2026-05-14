@@ -30,7 +30,7 @@ namespace OptiTrack.NatNetLatestAdapter {
 
 		public const string FrameSchemaVersion = "natnet_frame_v1";
 
-		private readonly NatNetOptiTrackClient innerClient;
+		readonly NatNetOptiTrackClient innerClient;
 
 
 		public NatNetLatestOptiTrackClient(ITelemetryService telemetryService) {
@@ -53,24 +53,18 @@ namespace OptiTrack.NatNetLatestAdapter {
 		public event EventHandler<OptiTrackConnectionEventArgs> ConnectionChanged;
 
 
-		public Task ConnectAsync(OptiTrackConnectionOptions connectionOptions, CancellationToken cancellationToken) {
-			return innerClient.ConnectAsync(connectionOptions, cancellationToken);
-		}
+		public Task ConnectAsync(OptiTrackConnectionOptions connectionOptions, CancellationToken cancellationToken) => innerClient.ConnectAsync(connectionOptions, cancellationToken);
 
 
-		public Task DisconnectAsync() {
-			return innerClient.DisconnectAsync();
-		}
+		public Task DisconnectAsync() => innerClient.DisconnectAsync();
 
 
-		public static SdkCompatibilityReport BuildCompatibilityReport(OptiTrackConnectionType connectionType) {
-			return SdkCompatibilityReport.Collect(
-					AdapterName,
-					AdapterVersion,
-					connectionType.ToString(),
-					SupportedSdkVersion,
-					FrameSchemaVersion);
-		}
+		public static SdkCompatibilityReport BuildCompatibilityReport(OptiTrackConnectionType connectionType) => SdkCompatibilityReport.Collect(
+				AdapterName,
+				AdapterVersion,
+				connectionType.ToString(),
+				SupportedSdkVersion,
+				FrameSchemaVersion);
 
 	}
 

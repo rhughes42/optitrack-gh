@@ -84,6 +84,38 @@ namespace OptiTrack.Core {
 		}
 
 
+		public OptiTrackFrame(int                               frameNumber, double timestampSeconds, double latencySeconds, bool isRecording, bool assetsChanged,
+							  IReadOnlyList<OptiTrackMarker>    markers,
+							  IReadOnlyList<OptiTrackRigidBody> rigidBodies,
+							  IReadOnlyList<string>             statusMessages) : this() {
+			FrameNumber      = frameNumber;
+			TimestampSeconds = timestampSeconds;
+			LatencySeconds   = latencySeconds;
+			IsRecording      = isRecording;
+			AssetsChanged    = assetsChanged;
+			Markers          = markers;
+			RigidBodies      = rigidBodies;
+			StatusMessages   = statusMessages;
+		}
+
+
+		public OptiTrackFrame(int                               frameNumber, double timestampSeconds, double latencySeconds, bool isRecording, bool assetsChanged,
+							  IReadOnlyList<OptiTrackMarker>    markers,
+							  IReadOnlyList<OptiTrackRigidBody> rigidBodies,
+							  IReadOnlyList<OptiTrackSkeleton>  skeletons,
+							  IReadOnlyList<string>             statusMessages) : this() {
+			FrameNumber      = frameNumber;
+			TimestampSeconds = timestampSeconds;
+			LatencySeconds   = latencySeconds;
+			IsRecording      = isRecording;
+			AssetsChanged    = assetsChanged;
+			Markers          = markers;
+			RigidBodies      = rigidBodies;
+			Skeletons        = skeletons;
+			StatusMessages   = statusMessages;
+		}
+
+
 		public int FrameNumber { get; set; }
 
 		public double TimestampSeconds { get; set; }

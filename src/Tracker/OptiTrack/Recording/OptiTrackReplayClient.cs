@@ -74,7 +74,7 @@ namespace OptiTrack.Recording {
 
 
 		public void SetFrameIndex(int index) {
-			if (Recording == null || Recording.Frames.Count == 0) {
+			if ((Recording == null) || (Recording.Frames.Count == 0)) {
 				return;
 			}
 
@@ -91,7 +91,7 @@ namespace OptiTrack.Recording {
 
 
 		public Task ConnectAsync(OptiTrackConnectionOptions options, CancellationToken cancellationToken) {
-			if (Recording == null || Recording.Frames.Count == 0) {
+			if ((Recording == null) || (Recording.Frames.Count == 0)) {
 				throw new InvalidOperationException("Replay recording has not been loaded or has zero frames.");
 			}
 
@@ -137,7 +137,7 @@ namespace OptiTrack.Recording {
 
 
 		async Task PlaybackLoopAsync(CancellationToken cancellationToken) {
-			while (!cancellationToken.IsCancellationRequested && Recording != null && Recording.Frames.Count > 0) {
+			while (!cancellationToken.IsCancellationRequested && (Recording != null) && (Recording.Frames.Count > 0)) {
 				if (pauseRequested) {
 					await Task.Delay(20, cancellationToken).ConfigureAwait(false);
 

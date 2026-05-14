@@ -81,12 +81,12 @@ namespace Tracker.Components {
 		}
 
 
-		private static OptiTrackConnectionType ParseMode(string mode) {
-			return string.Equals(mode, "Unicast", StringComparison.OrdinalIgnoreCase) ? OptiTrackConnectionType.Unicast : OptiTrackConnectionType.Multicast;
-		}
+		static OptiTrackConnectionType ParseMode(string mode) => string.Equals(mode, "Unicast", StringComparison.OrdinalIgnoreCase)
+				? OptiTrackConnectionType.Unicast
+				: OptiTrackConnectionType.Multicast;
 
 
-		private static string ParseRhinoMajor(string rhinoVersion) {
+		static string ParseRhinoMajor(string rhinoVersion) {
 			if (string.IsNullOrWhiteSpace(rhinoVersion)) {
 				return "unknown";
 			}

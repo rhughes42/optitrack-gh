@@ -15,7 +15,7 @@ namespace Tracker.Components {
 	/// </summary>
 	public sealed class SmoothPoseStreamComponent : GH_Component {
 
-		private static readonly ConcurrentDictionary<Guid, Plane> LastPlaneByComponent = new ConcurrentDictionary<Guid, Plane>();
+		static readonly ConcurrentDictionary<Guid, Plane> LastPlaneByComponent = new ConcurrentDictionary<Guid, Plane>();
 
 
 		public SmoothPoseStreamComponent() : base(
@@ -61,13 +61,10 @@ namespace Tracker.Components {
 			using (telemetry.StartSpan("smooth_pose_stream", context)) {
 				try {
 					if (reset) {
-						Plane removed;
-						LastPlaneByComponent.TryRemove(InstanceGuid, out removed);
+						LastPlaneByComponent.TryRemove(InstanceGuid, out Plane _);
 					}
 
-					Plane previous;
-
-					if (!LastPlaneByComponent.TryGetValue(InstanceGuid, out previous)) {
+					if (!LastPlaneByComponent.TryGetValue(InstanceGuid, out Plane previous)) {
 						LastPlaneByComponent[InstanceGuid] = current;
 						DA.SetData(0, current);
 						DA.SetData(1, telemetry.Status);
@@ -92,13 +89,11 @@ namespace Tracker.Components {
 		}
 
 
-		private static Point3d LerpPoint(Point3d a, Point3d b, double t) {
-			return new Point3d(a.X + (b.X - a.X) * t, a.Y + (b.Y - a.Y) * t, a.Z + (b.Z - a.Z) * t);
-		}
+		static Point3d LerpPoint(Point3d a, Point3d b, double t) => new Point3d(a.X + ((b.X - a.X) * t), a.Y + ((b.Y - a.Y) * t), a.Z + ((b.Z - a.Z) * t));
 
 
-		private static Vector3d LerpVector(Vector3d a, Vector3d b, double t) {
-			Vector3d vector = new Vector3d(a.X + (b.X - a.X) * t, a.Y + (b.Y - a.Y) * t, a.Z + (b.Z - a.Z) * t);
+		static Vector3d LerpVector(Vector3d a, Vector3d b, double t) {
+			Vector3d vector = new Vector3d(a.X + ((b.X - a.X) * t), a.Y + ((b.Y - a.Y) * t), a.Z + ((b.Z - a.Z) * t));
 			vector.Unitize();
 
 			return vector;

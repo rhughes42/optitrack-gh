@@ -15,7 +15,7 @@ namespace Tracker.Components {
 	/// </summary>
 	public sealed class VelocityAccelerationEstimateComponent : GH_Component {
 
-		private sealed class MotionState {
+		sealed class MotionState {
 
 			public Point3d  LastPoint;
 			public Vector3d LastVelocity;
@@ -24,7 +24,7 @@ namespace Tracker.Components {
 		}
 
 
-		private static readonly ConcurrentDictionary<Guid, MotionState> StateByComponent = new ConcurrentDictionary<Guid, MotionState>();
+		static readonly ConcurrentDictionary<Guid, MotionState> StateByComponent = new ConcurrentDictionary<Guid, MotionState>();
 
 
 		public VelocityAccelerationEstimateComponent() : base(
@@ -70,13 +70,10 @@ namespace Tracker.Components {
 			using (telemetry.StartSpan("velocity_acceleration_estimate", context)) {
 				try {
 					if (reset) {
-						MotionState removed;
-						StateByComponent.TryRemove(InstanceGuid, out removed);
+						StateByComponent.TryRemove(InstanceGuid, out MotionState _);
 					}
 
-					MotionState state;
-
-					if (!StateByComponent.TryGetValue(InstanceGuid, out state)) {
+					if (!StateByComponent.TryGetValue(InstanceGuid, out MotionState state)) {
 						state                          = new MotionState { LastPoint = point, LastVelocity = Vector3d.Zero, LastTimestamp = timestamp };
 						StateByComponent[InstanceGuid] = state;
 						DA.SetData(0, Vector3d.Zero);

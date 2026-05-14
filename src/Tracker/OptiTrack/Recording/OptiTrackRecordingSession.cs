@@ -19,8 +19,8 @@ namespace OptiTrack.Recording {
 	/// </summary>
 	public sealed class OptiTrackRecordingSession {
 
-		private readonly List<OptiTrackFrame> frames     = new List<OptiTrackFrame>();
-		private          DateTime             startedUtc = DateTime.MinValue;
+		readonly List<OptiTrackFrame> frames     = new List<OptiTrackFrame>();
+		DateTime                      startedUtc = DateTime.MinValue;
 
 		public bool IsRecording { get; private set; }
 
@@ -52,7 +52,7 @@ namespace OptiTrack.Recording {
 		/// </summary>
 		/// <param name="frame">Frame to append.</param>
 		public void AppendFrame(OptiTrackFrame frame) {
-			if (!IsRecording || frame == null) {
+			if (!IsRecording || (frame == null)) {
 				return;
 			}
 
@@ -84,7 +84,7 @@ namespace OptiTrack.Recording {
 		}
 
 
-		private double CalculateDurationSeconds() {
+		double CalculateDurationSeconds() {
 			if (frames.Count <= 1) {
 				return 0;
 			}
@@ -97,11 +97,11 @@ namespace OptiTrack.Recording {
 		}
 
 
-		private static string GetPluginVersion() {
+		static string GetPluginVersion() {
 			Assembly                              assembly  = typeof(OptiTrackRecordingSession).Assembly;
 			AssemblyInformationalVersionAttribute attribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
 
-			return attribute == null || string.IsNullOrWhiteSpace(attribute.InformationalVersion) ? "unknown" : attribute.InformationalVersion;
+			return (attribute == null) || string.IsNullOrWhiteSpace(attribute.InformationalVersion) ? "unknown" : attribute.InformationalVersion;
 		}
 
 	}

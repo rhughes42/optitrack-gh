@@ -16,12 +16,12 @@ namespace Tracker.Components {
 	/// </summary>
 	public sealed class ReplayOptiTrackRecordingComponent : GH_Component {
 
-		private static readonly object                sync = new object();
-		private static          OptiTrackReplayClient replayClient = new OptiTrackReplayClient();
-		private static          OptiTrackRecording    lastRecording;
-		private static          OptiTrackFrame        currentFrame;
-		private static readonly List<string>          status = new List<string>();
-		private static          bool                  handlersAttached;
+		static readonly object                sync         = new object();
+		static          OptiTrackReplayClient replayClient = new OptiTrackReplayClient();
+		static          OptiTrackRecording    lastRecording;
+		static          OptiTrackFrame        currentFrame;
+		static readonly List<string>          status = new List<string>();
+		static          bool                  handlersAttached;
 
 
 		public ReplayOptiTrackRecordingComponent() : base(
@@ -74,9 +74,7 @@ namespace Tracker.Components {
 			DA.GetData(5, ref scrubIndex);
 			DA.GetData(6, ref enableTelemetry);
 
-			OptiTrackRecording recording = recordingValue as OptiTrackRecording;
-
-			if (recording == null) {
+			if (!(recordingValue is OptiTrackRecording recording)) {
 				AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input Recording is not valid.");
 
 				return;
@@ -123,14 +121,20 @@ namespace Tracker.Components {
 							replayClient.Resume();
 						}
 
-						if (play && !replayClient.IsConnected) {
-							replayClient.ConnectAsync(new OptiTrackConnectionOptions(), CancellationToken.None).GetAwaiter().GetResult();
-							status.Add("Replay started.");
-						}
+						switch (play) {
+							case true when !replayClient.IsConnected:
 
-						if (!play && replayClient.IsConnected) {
-							replayClient.DisconnectAsync().GetAwaiter().GetResult();
-							status.Add("Replay stopped.");
+								replayClient.ConnectAsync(new OptiTrackConnectionOptions(), CancellationToken.None).GetAwaiter().GetResult();
+								status.Add("Replay started.");
+
+							break;
+
+							case false when replayClient.IsConnected:
+
+								replayClient.DisconnectAsync().GetAwaiter().GetResult();
+								status.Add("Replay stopped.");
+
+							break;
 						}
 					}
 				}
@@ -144,8 +148,8 @@ namespace Tracker.Components {
 			}
 
 			DA.SetData(0, currentFrame);
-			DA.SetData(1, currentFrame == null ? 0 : currentFrame.FrameNumber);
-			DA.SetData(2, currentFrame == null ? 0 : currentFrame.TimestampSeconds);
+			DA.SetData(1, currentFrame?.FrameNumber ?? 0);
+			DA.SetData(2, currentFrame?.TimestampSeconds ?? 0);
 			DA.SetData(3, replayClient.IsConnected);
 			DA.SetData(4, replayClient.DroppedOrLateFrames);
 			DA.SetDataList(5, status);
@@ -157,7 +161,7 @@ namespace Tracker.Components {
 		}
 
 
-		private void EnsureHandlers() {
+		void EnsureHandlers() {
 			if (handlersAttached) {
 				return;
 			}

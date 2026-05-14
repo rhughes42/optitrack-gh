@@ -15,9 +15,9 @@ namespace OptiTrack.Telemetry {
 	/// </summary>
 	public static class TelemetryServiceProvider {
 
-		private static readonly object            SyncRoot         = new object();
-		private static          ITelemetryService telemetryService = new NoOpTelemetryService();
-		private static          bool              telemetryEnabled;
+		static readonly object            SyncRoot         = new object();
+		static          ITelemetryService telemetryService = new NoOpTelemetryService();
+		static          bool              telemetryEnabled;
 
 
 		public static ITelemetryService GetService(bool enableTelemetry) {
@@ -35,10 +35,8 @@ namespace OptiTrack.Telemetry {
 		}
 
 
-		private static void DisposeCurrent() {
-			IDisposable disposable = telemetryService as IDisposable;
-
-			if (disposable != null) {
+		static void DisposeCurrent() {
+			if (telemetryService is IDisposable disposable) {
 				disposable.Dispose();
 			}
 		}
