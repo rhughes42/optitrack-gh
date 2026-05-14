@@ -107,25 +107,27 @@ namespace OptiTrack.NatNet {
 
 
 		private void Disconnect() {
-			SetConnectionStatus(OptiTrackConnectionStatus.Disconnecting, "Disconnecting from server...");
+			using (telemetryService.StartSpan("natnet.disconnect", new TelemetryContext())) {
+				SetConnectionStatus(OptiTrackConnectionStatus.Disconnecting, "Disconnecting from server...");
 
-			try {
-				lock (syncRoot) {
-					natNetClient.OnFrameReady -= OnFrameReady;
-					natNetClient.Disconnect();
-					dataDescriptors.Clear();
-					rigidBodies.Clear();
-					skeletons.Clear();
-					forcePlates.Clear();
-					statusMessages.Clear();
-					statusMessages.Add("Service stopped. Activate module to begin streaming.");
+				try {
+					lock (syncRoot) {
+						natNetClient.OnFrameReady -= OnFrameReady;
+						natNetClient.Disconnect();
+						dataDescriptors.Clear();
+						rigidBodies.Clear();
+						skeletons.Clear();
+						forcePlates.Clear();
+						statusMessages.Clear();
+						statusMessages.Add("Service stopped. Activate module to begin streaming.");
+					}
+
+					SetConnectionStatus(OptiTrackConnectionStatus.Disconnected, "Service stopped. Activate module to begin streaming.");
 				}
-
-				SetConnectionStatus(OptiTrackConnectionStatus.Disconnected, "Service stopped. Activate module to begin streaming.");
-			}
-			catch (Exception exception) {
-				telemetryService.CaptureException(exception, new TelemetryContext().SetTag("operation", "natnet_disconnect"));
-				SetConnectionStatus(OptiTrackConnectionStatus.Faulted, "Error: Failed to disconnect cleanly.");
+				catch (Exception exception) {
+					telemetryService.CaptureException(exception, new TelemetryContext().SetTag("operation", "natnet_disconnect"));
+					SetConnectionStatus(OptiTrackConnectionStatus.Faulted, "Error: Failed to disconnect cleanly.");
+				}
 			}
 		}
 
@@ -204,23 +206,25 @@ namespace OptiTrack.NatNet {
 			try {
 				OptiTrackFrame frame;
 
-				lock (syncRoot) {
-					if (data.bTrackingModelsChanged == true
-						|| data.nRigidBodies != rigidBodies.Count
-						|| data.nSkeletons != skeletons.Count
-						|| data.nForcePlates != forcePlates.Count
-						|| assetsChanged) {
-						assetsChanged = false;
-						FetchDataDescriptions();
+				using (telemetryService.StartSpan("natnet.frame_received", new TelemetryContext().SetMetric("frame_count", data.iFrame))) {
+					lock (syncRoot) {
+						if (data.bTrackingModelsChanged == true
+							|| data.nRigidBodies != rigidBodies.Count
+							|| data.nSkeletons != skeletons.Count
+							|| data.nForcePlates != forcePlates.Count
+							|| assetsChanged) {
+							assetsChanged = false;
+							FetchDataDescriptions();
+						}
+
+						frame = NatNetFrameConverter.ConvertFrame(data, client, rigidBodies, options, new List<string>(statusMessages));
 					}
 
-					frame = NatNetFrameConverter.ConvertFrame(data, client, rigidBodies, options, new List<string>(statusMessages));
-				}
+					EventHandler<OptiTrackFrameEventArgs> handler = FrameReceived;
 
-				EventHandler<OptiTrackFrameEventArgs> handler = FrameReceived;
-
-				if (handler != null) {
-					handler(this, new OptiTrackFrameEventArgs(frame));
+					if (handler != null) {
+						handler(this, new OptiTrackFrameEventArgs(frame));
+					}
 				}
 			}
 			catch (Exception exception) {

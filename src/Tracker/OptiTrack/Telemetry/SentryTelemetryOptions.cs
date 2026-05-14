@@ -15,7 +15,7 @@ namespace OptiTrack.Telemetry {
 
 		public string Release { get; set; } = "tracker@1.4.0";
 
-		public double? TracesSampleRate { get; set; }
+		public double? TracesSampleRate { get; set; } = 0.0;
 
 
 		public static SentryTelemetryOptions Load() {

@@ -13,8 +13,8 @@ namespace Tracker.Components {
 
 	public sealed class ReplayOptiTrackRecordingComponent : GH_Component {
 
-		private static readonly object                sync         = new object();
-		private static readonly OptiTrackReplayClient replayClient = new OptiTrackReplayClient();
+		private static readonly object                sync = new object();
+		private static          OptiTrackReplayClient replayClient = new OptiTrackReplayClient();
 		private static          OptiTrackRecording    lastRecording;
 		private static          OptiTrackFrame        currentFrame;
 		private static readonly List<string>          status = new List<string>();
@@ -80,6 +80,10 @@ namespace Tracker.Components {
 			}
 
 			ITelemetryService telemetry = TelemetryServiceProvider.GetService(enableTelemetry);
+			if (!replayClient.IsConnected) {
+				replayClient      = new OptiTrackReplayClient(telemetry);
+				handlersAttached = false;
+			}
 
 			TelemetryContext context = new TelemetryContext().SetTag("component", "replay_recording").SetTag("format_version", recording.FormatVersion)
 															 .SetMetric("frame_count", recording.Frames.Count);

@@ -36,7 +36,7 @@ A local config file named `tracker.telemetry.local.json` may be placed next to `
 }
 ```
 
-## Current v1.7.0 Boundary
+## Current v1.8.0 Boundary
 
 Tracker includes an internal telemetry boundary:
 
@@ -103,7 +103,30 @@ Any future telemetry integration must scrub sensitive data before an event leave
 
 ## Performance Monitoring
 
-Performance monitoring, if enabled, should use aggregate spans and counters only. Acceptable examples include:
+Performance monitoring, if enabled, uses low-cardinality spans and aggregate counters only. v1.8.0 span names:
+
+- `natnet.connect`
+- `natnet.disconnect`
+- `natnet.frame_received`
+- `grasshopper.solve`
+- `grasshopper.geometry_conversion`
+- `replay.frame_load`
+- `replay.frame_step`
+- `frame_buffer.consume`
+
+Safe metrics include:
+
+- `frame_count`
+- `rigid_body_count`
+- `marker_count`
+- `skipped_frame_count`
+- `dropped_frame_count`
+- `solve_duration_ms`
+- `conversion_duration_ms`
+- `buffer_age_ms`
+- `reconnect_count`
+
+Acceptable aggregate examples include:
 
 - Component solve duration buckets
 - Connection attempt counts
@@ -112,7 +135,7 @@ Performance monitoring, if enabled, should use aggregate spans and counters only
 
 Do not attach frame payloads or per-marker/per-rigid-body values.
 
-## Recording and Replay Rules (v1.7.0)
+## Recording and Replay Rules (v1.8.0)
 
 Allowed recording/replay telemetry:
 

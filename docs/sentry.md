@@ -1,4 +1,4 @@
-# Optional Sentry Setup
+# Optional Sentry Setup (v1.8.0)
 
 Sentry is optional in Tracker and is disabled by default.
 
@@ -29,10 +29,20 @@ Example local file:
 {
   "SENTRY_DSN": "",
   "SENTRY_ENVIRONMENT": "local",
-  "SENTRY_RELEASE": "tracker@1.7.0",
+  "SENTRY_RELEASE": "tracker@1.8.0",
   "SENTRY_TRACES_SAMPLE_RATE": "0"
 }
 ```
+
+## Sampling Guidance
+
+Tracing is disabled unless configured. `SENTRY_TRACES_SAMPLE_RATE` defaults to `0`.
+
+Recommended values:
+
+- local development: `0.05` to `0.2`
+- production: `0.005` to `0.05`
+- privacy-first / no performance telemetry: `0`
 
 ## 3. Enable or Disable in Grasshopper
 
@@ -69,7 +79,7 @@ flowchart LR
 
 ## 7. Safe Performance Monitoring Test
 
-1. Enable telemetry with low sample rate (for example `0` to `0.05`).
+1. Enable telemetry with low sample rate (for example `0.01` to `0.05`).
 2. Run replay or conversion operations.
 3. Verify events contain aggregate duration/count metrics only.
 4. Confirm no geometry payload fields are present.

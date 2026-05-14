@@ -78,11 +78,13 @@
     <Compile Include="OptiTrack\Geometry\AxisRemapMode.cs" />
     <Compile Include="OptiTrack\Geometry\OptiTrackGeometryConverter.cs" />
     <Compile Include="OptiTrack\Core\IOptiTrackClient.cs" />
+    <Compile Include="OptiTrack\Core\LatestFrameBuffer.cs" />
     <Compile Include="OptiTrack\Core\OptiTrackConnectionInfo.cs" />
     <Compile Include="OptiTrack\Core\OptiTrackConnectionOptions.cs" />
     <Compile Include="OptiTrack\Core\OptiTrackConnectionStatus.cs" />
     <Compile Include="OptiTrack\Core\OptiTrackEventArgs.cs" />
     <Compile Include="OptiTrack\Core\OptiTrackModels.cs" />
+    <Compile Include="OptiTrack\Core\TrackerLogger.cs" />
     <Compile Include="OptiTrack\NatNet\NatNetFrameConverter.cs" />
     <Compile Include="OptiTrack\NatNet\NatNetOptiTrackClient.cs" />
     <Compile Include="OptiTrack\Recording\OptiTrackFrameSnapshot.cs" />

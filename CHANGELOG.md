@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.8.0
+
+- Decoupled live NatNet capture from Grasshopper solve cadence using a latest-frame buffer to prevent per-frame recompute overload.
+- Added stream update controls: `Target Update Interval (ms)` and advanced `Redraw Every Frame` mode.
+- Added tracker diagnostics output for frame receive/consume/skipped/dropped counts, buffer age, uptime, reconnect count, and status snapshots.
+- Improved connect/disconnect safety with timer disposal, guarded event subscriptions, and safer component deletion cleanup behavior.
+- Added lightweight internal logger with optional debug verbosity and runtime state reporting.
+- Added optional sanitized performance instrumentation spans for NatNet connect/disconnect/frame, frame buffer consume, Grasshopper solve/conversion, and replay frame load/step.
+- Added aggregate-only performance metrics (`frame_count`, `marker_count`, `rigid_body_count`, `solve_duration_ms`, `conversion_duration_ms`, `buffer_age_ms`, and related counters).
+- Kept Sentry performance monitoring disabled unless explicitly configured (`SENTRY_DSN` + `SENTRY_TRACES_SAMPLE_RATE`), with default traces sample rate `0`.
+- Added/updated v1.8.0 documentation in `docs/performance.md`, `docs/troubleshooting.md`, `docs/developer-guide.md`, `docs/telemetry.md`, and `docs/sentry.md`.
+
 ## v1.7.0
 
 - Added a full documentation index and new getting-started, networking, release-process, and optional Sentry setup guides.

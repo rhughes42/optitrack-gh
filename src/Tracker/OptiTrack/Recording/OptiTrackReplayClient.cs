@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using OptiTrack.Core;
+using OptiTrack.Telemetry;
 
 
 namespace OptiTrack.Recording {
@@ -10,10 +11,18 @@ namespace OptiTrack.Recording {
 	public sealed class OptiTrackReplayClient : IOptiTrackClient {
 
 		readonly object         sync = new object();
+		readonly ITelemetryService telemetry;
 		CancellationTokenSource playbackCancellation;
 		Task                    playbackTask = Task.CompletedTask;
 		int                     currentIndex;
 		bool                    pauseRequested;
+
+		public OptiTrackReplayClient() : this(new NoOpTelemetryService()) { }
+
+
+		public OptiTrackReplayClient(ITelemetryService telemetryService) {
+			telemetry = telemetryService ?? new NoOpTelemetryService();
+		}
 
 		public bool LoopPlayback { get; set; }
 
@@ -35,9 +44,11 @@ namespace OptiTrack.Recording {
 
 
 		public void LoadRecording(OptiTrackRecording recording) {
-			Recording           = recording ?? throw new ArgumentNullException(nameof(recording));
-			currentIndex        = 0;
-			DroppedOrLateFrames = 0;
+			using (telemetry.StartSpan("replay.frame_load", new TelemetryContext().SetMetric("frame_count", recording == null ? 0 : recording.Frames.Count))) {
+				Recording           = recording ?? throw new ArgumentNullException(nameof(recording));
+				currentIndex        = 0;
+				DroppedOrLateFrames = 0;
+			}
 		}
 
 
@@ -143,7 +154,9 @@ namespace OptiTrack.Recording {
 				}
 
 				OptiTrackFrame frame = Recording.Frames[frameIndex];
-				FrameReceived?.Invoke(this, new OptiTrackFrameEventArgs(OptiTrackFrameSnapshot.Clone(frame)));
+				using (telemetry.StartSpan("replay.frame_step", new TelemetryContext().SetMetric("frame_count", frameIndex + 1))) {
+					FrameReceived?.Invoke(this, new OptiTrackFrameEventArgs(OptiTrackFrameSnapshot.Clone(frame)));
+				}
 
 				int    nextIndex    = frameIndex + 1;
 				double delaySeconds = 1.0 / 60.0;
