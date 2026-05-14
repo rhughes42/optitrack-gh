@@ -36,7 +36,7 @@ A local config file named `tracker.telemetry.local.json` may be placed next to `
 }
 ```
 
-## Current v1.8.0 Boundary
+## Current v1.9.0 Boundary
 
 Tracker includes an internal telemetry boundary:
 
@@ -135,7 +135,21 @@ Acceptable aggregate examples include:
 
 Do not attach frame payloads or per-marker/per-rigid-body values.
 
-## Recording and Replay Rules (v1.8.0)
+## SDK Compatibility Diagnostics (v1.9.0)
+
+Tracker can emit sanitized compatibility diagnostics when telemetry is enabled and configured. Allowed compatibility tags:
+
+- `adapter_name`
+- `natnet_assembly_version`
+- `plugin_version`
+- `rhino_major_version`
+- `grasshopper_version`
+- `connection_mode`
+- `sdk_load_failure_type`
+
+Compatibility diagnostics must not include IP addresses, file paths, machine names, usernames, project/model names, or raw frame content.
+
+## Recording and Replay Rules (v1.9.0)
 
 Allowed recording/replay telemetry:
 

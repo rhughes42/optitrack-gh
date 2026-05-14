@@ -9,6 +9,8 @@ The plugin exposes an **OptiTrack Stream** live-capture component plus reusable 
 - [Getting Started](docs/getting-started.md)
 - [Installation](docs/setup.md)
 - [Compatibility](docs/compatibility.md)
+- [SDK Compatibility](docs/sdk-compatibility.md)
+- [SDK Upgrade Notes](docs/sdk-upgrade-notes.md)
 - [Examples](examples/README.md)
 - [Developer Guide](docs/developer-guide.md)
 - [Troubleshooting](docs/troubleshooting.md)
@@ -72,6 +74,19 @@ For offline testing without Motive, use the recording/replay components document
 - The project targets .NET Framework 4.8 and is intended for Rhino/Grasshopper on Windows.
 - CI builds may be limited by Rhino/Grasshopper and NatNet runtime availability.
 
+## SDK Compatibility
+
+Tracker v1.9.0 keeps NatNet 4.0 as the active, compatibility-managed baseline.
+
+- Active adapter: `OptiTrack.NatNet4Adapter`
+- Future adapter placeholder: `OptiTrack.NatNetLatestAdapter` (not enabled)
+- Upgrade policy: verify APIs, runtime loading, and live capture behavior before changing SDK binaries
+
+See:
+
+- [docs/sdk-compatibility.md](docs/sdk-compatibility.md)
+- [docs/sdk-upgrade-notes.md](docs/sdk-upgrade-notes.md)
+
 ## Telemetry and Error Reporting
 
 Telemetry/error reporting is optional and disabled unless explicitly enabled and configured. No Sentry DSN or project-specific telemetry setting is stored in source control.
@@ -89,7 +104,7 @@ Maintainers may use the Codex Sentry plugin for read-only issue review, but that
 
 ## Version
 
-Current modernization target: `v1.7.0`.
+Current modernization target: `v1.9.0`.
 
 ## Contributors
 

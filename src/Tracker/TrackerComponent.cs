@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using Grasshopper.Kernel;
 
 using OptiTrack.Core;
-using OptiTrack.NatNet;
+using OptiTrack.NatNet4Adapter;
 using OptiTrack.Telemetry;
 
 using Rhino;
@@ -43,6 +43,7 @@ namespace Tracker {
 		private static          DateTime          lastSolveUtc = DateTime.MinValue;
 		private static          DateTime          lastScheduledSolutionUtc = DateTime.MinValue;
 		private static          DateTime          lastFrameUtc = DateTime.MinValue;
+		private static          SdkCompatibilityReport compatibilityReport = SdkCompatibilityReport.Collect(NatNet4OptiTrackClient.AdapterName, "Multicast");
 
 		private static bool RigidBody;
 		private static bool Skeleton;
@@ -62,7 +63,7 @@ namespace Tracker {
 
 
 		private static IOptiTrackClient CreateClient(ITelemetryService telemetryService) {
-			return new NatNetOptiTrackClient(telemetryService);
+			return new NatNet4OptiTrackClient(telemetryService);
 		}
 
 
@@ -248,6 +249,8 @@ namespace Tracker {
 				optiTrackClient.ConnectAsync(options, CancellationToken.None).GetAwaiter().GetResult();
 				connectionConfirmed = optiTrackClient.IsConnected;
 				if (connectionConfirmed) {
+					compatibilityReport = NatNet4OptiTrackClient.BuildCompatibilityReport(connectionType);
+					EmitCompatibilityTelemetry(compatibilityReport);
 					StartUpdateTimer();
 					logger.Info("Success: Data port connected.");
 					AddRuntimeMessageToActiveInstances("Tracker connected.", GH_RuntimeMessageLevel.Remark);
@@ -429,6 +432,7 @@ namespace Tracker {
 			lines.Add("uptime_seconds=" + uptime.TotalSeconds.ToString("F1"));
 			lines.Add("reconnect_count=" + reconnectCount);
 			lines.Add("last_solve_timestamp_utc=" + (lastSolveUtc == DateTime.MinValue ? "n/a" : lastSolveUtc.ToString("O")));
+			lines.AddRange(compatibilityReport.ToDiagnosticsLines());
 
 			telemetry.CaptureMessage("diagnostics", TelemetrySeverity.Debug, new TelemetryContext()
 					.SetMetric("frame_count", frameBuffer.TotalReceived)
@@ -438,6 +442,34 @@ namespace Tracker {
 					.SetMetric("reconnect_count", reconnectCount));
 
 			return lines;
+		}
+
+
+		private static void EmitCompatibilityTelemetry(SdkCompatibilityReport report) {
+			if (report == null) {
+				return;
+			}
+
+			telemetry.CaptureMessage(
+					"sdk.compatibility",
+					TelemetrySeverity.Debug,
+					new TelemetryContext().SetTag("adapter_name", report.AdapterName)
+										  .SetTag("natnet_assembly_version", report.NatNetAssemblyVersion)
+										  .SetTag("plugin_version", report.PluginVersion)
+										  .SetTag("rhino_major_version", ParseRhinoMajor(report.RhinoVersion))
+										  .SetTag("grasshopper_version", report.GrasshopperVersion)
+										  .SetTag("connection_mode", report.ConnectionMode)
+										  .SetTag("sdk_load_failure_type", string.IsNullOrWhiteSpace(report.SdkLoadFailureType) ? "none" : report.SdkLoadFailureType));
+		}
+
+
+		private static string ParseRhinoMajor(string rhinoVersion) {
+			if (string.IsNullOrWhiteSpace(rhinoVersion)) {
+				return "unknown";
+			}
+
+			int split = rhinoVersion.IndexOf('.');
+			return split > 0 ? rhinoVersion.Substring(0, split) : rhinoVersion;
 		}
 
 

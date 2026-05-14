@@ -54,8 +54,9 @@ namespace OptiTrack.Telemetry {
 													});
 
 				SentrySdk.SetTag("plugin_version", GetPluginVersion());
-				SentrySdk.SetTag("adapter_name", "NatNet");
+				SentrySdk.SetTag("adapter_name", "NatNet4Adapter");
 				SentrySdk.SetTag("rhino_version", GetRhinoVersion());
+				SentrySdk.SetTag("sentry_sdk_version", typeof(SentrySdk).Assembly.GetName().Version?.ToString() ?? "unknown");
 
 				return new SentryTelemetryService(sentry, "active");
 			}

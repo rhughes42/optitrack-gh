@@ -1,4 +1,4 @@
-# Optional Sentry Setup (v1.8.0)
+# Optional Sentry Setup (v1.9.0)
 
 Sentry is optional in Tracker and is disabled by default.
 
@@ -83,3 +83,18 @@ flowchart LR
 2. Run replay or conversion operations.
 3. Verify events contain aggregate duration/count metrics only.
 4. Confirm no geometry payload fields are present.
+
+## 8. Compatibility Diagnostics Test
+
+1. Keep telemetry disabled and verify normal runtime behavior.
+2. Enable telemetry with a test DSN and low trace sample rate.
+3. Connect to live stream or run `Inspect SDK Compatibility`.
+4. Verify only the approved compatibility tags are emitted:
+   - `adapter_name`
+   - `natnet_assembly_version`
+   - `plugin_version`
+   - `rhino_major_version`
+   - `grasshopper_version`
+   - `connection_mode`
+   - `sdk_load_failure_type`
+5. Verify no IPs, file paths, usernames, machine names, or frame payload values are present.

@@ -3,6 +3,8 @@
 - [Getting Started](getting-started.md)
 - [Setup and Installation](setup.md)
 - [Compatibility Matrix](compatibility.md)
+- [SDK Compatibility](sdk-compatibility.md)
+- [SDK Upgrade Notes](sdk-upgrade-notes.md)
 - [Grasshopper Components](grasshopper-components.md)
 - [OptiTrack Networking](optitrack-networking.md)
 - [Coordinate Systems](coordinate-systems.md)

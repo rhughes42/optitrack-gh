@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.9.0
+
+- Added formal SDK compatibility documentation and process: `docs/sdk-compatibility.md` and `docs/sdk-upgrade-notes.md`.
+- Added explicit adapter strategy with active NatNet 4 adapter namespace (`OptiTrack.NatNet4Adapter`) and a non-enabled placeholder for a future latest SDK adapter (`OptiTrack.NatNetLatestAdapter`).
+- Added runtime compatibility reporting fields for adapter name, plugin version, NatNet assembly version, connection mode, Rhino version, Grasshopper version, Sentry SDK version, and SDK load failure type.
+- Added `Inspect SDK Compatibility` component for standalone compatibility diagnostics.
+- Added optional sanitized Sentry compatibility diagnostics (`sdk.compatibility`) with low-cardinality tags only.
+- Updated compatibility, telemetry, sentry, and README documentation with SDK compatibility and verification workflows.
+- Preserved existing NatNet 4.0 capture behavior and v1.8.0 frame buffering/recompute throttling behavior.
+
 ## v1.8.0
 
 - Decoupled live NatNet capture from Grasshopper solve cadence using a latest-frame buffer to prevent per-frame recompute overload.

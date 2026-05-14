@@ -66,6 +66,7 @@
     <Compile Include="Components\ApplyOptiTrackTransformComponent.cs" />
     <Compile Include="Components\CalibrateOptiTrackFrameComponent.cs" />
     <Compile Include="Components\FilterRigidBodiesComponent.cs" />
+    <Compile Include="Components\InspectSdkCompatibilityComponent.cs" />
     <Compile Include="Components\InspectRecordingMetadataComponent.cs" />
     <Compile Include="Components\LoadOptiTrackRecordingComponent.cs" />
     <Compile Include="Components\MarkersToPointsComponent.cs" />
@@ -84,9 +85,12 @@
     <Compile Include="OptiTrack\Core\OptiTrackConnectionStatus.cs" />
     <Compile Include="OptiTrack\Core\OptiTrackEventArgs.cs" />
     <Compile Include="OptiTrack\Core\OptiTrackModels.cs" />
+    <Compile Include="OptiTrack\Core\SdkCompatibilityReport.cs" />
     <Compile Include="OptiTrack\Core\TrackerLogger.cs" />
     <Compile Include="OptiTrack\NatNet\NatNetFrameConverter.cs" />
     <Compile Include="OptiTrack\NatNet\NatNetOptiTrackClient.cs" />
+    <Compile Include="OptiTrack\NatNet4Adapter\NatNet4OptiTrackClient.cs" />
+    <Compile Include="OptiTrack\NatNetLatestAdapter\NatNetLatestAdapterPlaceholder.cs" />
     <Compile Include="OptiTrack\Recording\OptiTrackFrameSnapshot.cs" />
     <Compile Include="OptiTrack\Recording\OptiTrackRecordingModels.cs" />
     <Compile Include="OptiTrack\Recording\OptiTrackRecordingSerializer.cs" />
