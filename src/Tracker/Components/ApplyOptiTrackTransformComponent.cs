@@ -11,6 +11,9 @@ using Rhino.Geometry;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Applies a Rhino transform to incoming geometry while preserving tree structure.
+	/// </summary>
 	public sealed class ApplyOptiTrackTransformComponent : GH_Component {
 
 		public ApplyOptiTrackTransformComponent() : base(

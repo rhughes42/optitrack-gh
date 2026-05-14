@@ -1,3 +1,10 @@
+/*
+ * File: SentryTelemetryService.cs
+ * Purpose: Optional Sentry-backed telemetry implementation.
+ * Scope: Telemetry
+ * Notes: Must never block plugin operation. Initialization/capture failures downgrade to local no-op behavior.
+ */
+
 using System;
 using System.Reflection;
 
@@ -6,6 +13,13 @@ using Sentry;
 
 namespace OptiTrack.Telemetry {
 
+	/// <summary>
+	/// Optional <see cref="ITelemetryService"/> implementation backed by Sentry SDK.
+	/// </summary>
+	/// <remarks>
+	/// Telemetry is only active when explicitly enabled and a valid DSN is provided.
+	/// This implementation enforces redaction and low-cardinality tags; raw OptiTrack frame content must never be emitted.
+	/// </remarks>
 	public sealed class SentryTelemetryService : ITelemetryService, IDisposable {
 
 		private readonly IDisposable sentry;
@@ -18,9 +32,17 @@ namespace OptiTrack.Telemetry {
 		}
 
 
+		/// <summary>
+		/// Gets telemetry backend status for diagnostics.
+		/// </summary>
 		public string Status { get; private set; }
 
 
+		/// <summary>
+		/// Creates either an active Sentry-backed service or a no-op service.
+		/// </summary>
+		/// <param name="enabled">Whether telemetry is enabled by user input.</param>
+		/// <returns>Telemetry service implementation.</returns>
 		public static ITelemetryService Create(bool enabled) {
 			if (!enabled) {
 				return new NoOpTelemetryService("disabled");
@@ -46,6 +68,7 @@ namespace OptiTrack.Telemetry {
 														options.TracesSampleRate = ClampSampleRate(configuration.TracesSampleRate);
 
 														options.SetBeforeSend(evt => {
+																				  // Drop server/request envelopes to avoid accidental host/request metadata leakage.
 																				  evt.ServerName = null;
 																				  evt.Request    = null;
 
@@ -61,18 +84,25 @@ namespace OptiTrack.Telemetry {
 				return new SentryTelemetryService(sentry, "active");
 			}
 			catch {
+				// Telemetry initialization must not crash plugin startup paths.
 				return new NoOpTelemetryService("failed: Sentry configuration could not be initialized");
 			}
 		}
 
 
+		/// <summary>
+		/// Captures a sanitized exception classification.
+		/// </summary>
+		/// <param name="exception">Exception to capture.</param>
+		/// <param name="context">Optional telemetry context.</param>
 		public void CaptureException(Exception exception, TelemetryContext context) {
 			if (exception == null) {
 				return;
 			}
 
 			try {
-				Exception sanitizedException = new Exception(TelemetrySanitizer.SanitizeValue(exception.GetType().Name + ": " + exception.Message));
+				// Intentionally avoid forwarding exception message text because it may contain user-specific names or file identifiers.
+				Exception sanitizedException = new Exception(TelemetrySanitizer.SanitizeValue(exception.GetType().Name));
 
 				SentrySdk.CaptureException(
 						sanitizedException,
@@ -82,26 +112,43 @@ namespace OptiTrack.Telemetry {
 						});
 			}
 			catch {
+				// Capture failures are intentionally non-fatal.
 				Status = "failed: Sentry capture failed";
 			}
 		}
 
 
+		/// <summary>
+		/// Captures a sanitized message event.
+		/// </summary>
+		/// <param name="message">Message/operation name.</param>
+		/// <param name="severity">Message severity.</param>
+		/// <param name="context">Optional telemetry context.</param>
 		public void CaptureMessage(string message, TelemetrySeverity severity, TelemetryContext context) {
 			try {
 				SentrySdk.CaptureMessage(TelemetrySanitizer.SanitizeValue(message), scope => ApplyContext(scope, context), ToSentryLevel(severity));
 			}
 			catch {
+				// Capture failures are intentionally non-fatal.
 				Status = "failed: Sentry capture failed";
 			}
 		}
 
 
+		/// <summary>
+		/// Starts a timing scope represented as a low-cardinality message/span.
+		/// </summary>
+		/// <param name="operationName">Operation identifier.</param>
+		/// <param name="context">Optional telemetry context.</param>
+		/// <returns>Disposable telemetry scope.</returns>
 		public TelemetryScope StartSpan(string operationName, TelemetryContext context) {
 			return new TelemetryScope(this, operationName, context);
 		}
 
 
+		/// <summary>
+		/// Disposes the underlying Sentry SDK handle.
+		/// </summary>
 		public void Dispose() {
 			if (disposed) {
 				return;

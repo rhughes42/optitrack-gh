@@ -1,8 +1,18 @@
+/*
+ * File: OptiTrackModels.cs
+ * Purpose: Transport-neutral frame/domain models shared by live, replay, geometry, and recording paths.
+ * Scope: Core
+ * Notes: These models intentionally carry rich motion data for local computation and file recording.
+ */
+
 using System.Collections.Generic;
 
 
 namespace OptiTrack.Core {
 
+	/// <summary>
+	/// Generic marker sample in OptiTrack world units (typically meters).
+	/// </summary>
 	public sealed class OptiTrackMarker {
 
 		public int Id { get; set; }
@@ -18,6 +28,9 @@ namespace OptiTrack.Core {
 	}
 
 
+	/// <summary>
+	/// Rigid body pose sample for a single frame.
+	/// </summary>
 	public sealed class OptiTrackRigidBody {
 
 		public int Id { get; set; }
@@ -43,6 +56,9 @@ namespace OptiTrack.Core {
 	}
 
 
+	/// <summary>
+	/// Skeleton identifier metadata for a frame.
+	/// </summary>
 	public sealed class OptiTrackSkeleton {
 
 		public int Id { get; set; }
@@ -52,6 +68,12 @@ namespace OptiTrack.Core {
 	}
 
 
+	/// <summary>
+	/// Full frame snapshot used by components, replay, and recording.
+	/// </summary>
+	/// <remarks>
+	/// This payload may contain sensitive capture content and must not be sent to telemetry directly.
+	/// </remarks>
 	public sealed class OptiTrackFrame {
 
 		public OptiTrackFrame() {

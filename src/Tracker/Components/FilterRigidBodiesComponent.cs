@@ -11,6 +11,9 @@ using Rhino.Geometry;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Filters rigid body lists using include/exclude regular expressions.
+	/// </summary>
 	public sealed class FilterRigidBodiesComponent : GH_Component {
 
 		public FilterRigidBodiesComponent() : base(

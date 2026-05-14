@@ -11,6 +11,9 @@ using Rhino.Geometry;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Converts rigid body pose values into a Rhino transform.
+	/// </summary>
 	public sealed class RigidBodyToTransformComponent : GH_Component {
 
 		public RigidBodyToTransformComponent() : base(

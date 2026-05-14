@@ -11,6 +11,9 @@ using OptiTrack.Telemetry;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Plays loaded recording frames through an <see cref="IOptiTrackClient"/>-compatible replay client.
+	/// </summary>
 	public sealed class ReplayOptiTrackRecordingComponent : GH_Component {
 
 		private static readonly object                sync = new object();

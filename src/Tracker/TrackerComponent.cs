@@ -1,3 +1,11 @@
+/*
+ * File: TrackerComponent.cs
+ * Purpose: Main Grasshopper live-stream component for OptiTrack/NatNet ingestion and visualization.
+ * Scope: Grasshopper / NatNet / Telemetry
+ * Notes: NatNet callbacks run off the UI thread; latest-frame buffering and scheduled solves prevent UI stalls.
+ *        Telemetry is optional and must remain sanitized (no raw frame payloads, names, paths, or addresses).
+ */
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,6 +27,14 @@ using Rhino.Geometry;
 
 namespace Tracker {
 
+	/// <summary>
+	/// Main live-stream component that connects to Motive over NatNet and exposes frame-derived Grasshopper outputs.
+	/// </summary>
+	/// <remarks>
+	/// This type is stateful and uses shared static state because legacy Tracker behavior expects one global stream state.
+	/// Incoming NatNet frames are accepted on callback threads and handed off through <see cref="LatestFrameBuffer"/> to
+	/// <see cref="SolveInstance"/> at a controlled cadence.
+	/// </remarks>
 	public class TrackerComponent : GH_Component {
 
 		private const int DefaultUpdateIntervalMs = 100;
@@ -33,6 +49,7 @@ namespace Tracker {
 		private static          DateTime          connectionStartedUtc    = DateTime.MinValue;
 		private static          bool              handlersAttached;
 		private static          bool              connectionConfirmed;
+		private static          bool              hasConnectedOnce;
 		private static          bool              telemetryEnabled;
 		private static          bool              isDeleted;
 		private static          bool              redrawEveryFrame;
@@ -61,9 +78,19 @@ namespace Tracker {
 		private static readonly List<string>    warnings        = new List<string>();
 
 
+		#region Construction
+
+		/// <summary>
+		/// Initializes the OptiTrack stream component metadata.
+		/// </summary>
 		public TrackerComponent() : base("OptiTrack Stream", "OptiTrack Stream", "Connect to Motive over NatNet and stream OptiTrack data into Grasshopper.", "Tracker", "OptiTrack") { }
 
 
+		/// <summary>
+		/// Creates the active NatNet client adapter according to environment selection.
+		/// </summary>
+		/// <param name="telemetryService">Telemetry boundary service used by the adapter.</param>
+		/// <returns>Configured NatNet adapter instance.</returns>
 		private static IOptiTrackClient CreateClient(ITelemetryService telemetryService) {
 			string mode = (Environment.GetEnvironmentVariable("TRACKER_NATNET_ADAPTER") ?? string.Empty).Trim();
 
@@ -77,6 +104,9 @@ namespace Tracker {
 			return new NatNet4OptiTrackClient(telemetryService);
 		}
 
+		#endregion
+
+		#region Grasshopper Metadata
 
 		protected override void RegisterInputParams(GH_InputParamManager pManager) {
 			pManager.AddBooleanParameter("Connect", "Connect", "Connect to the Motive NatNet stream.", GH_ParamAccess.item, false);
@@ -100,7 +130,7 @@ namespace Tracker {
 			pManager.AddPointParameter("Markers", "Markers", "Generic, unlabelled marker data.", GH_ParamAccess.list);
 			pManager.AddTextParameter("Labels", "Labels", "Marker labels.", GH_ParamAccess.list);
 			pManager.AddTextParameter("RB Name", "RB Name", "List of Rigid Body name data.", GH_ParamAccess.list);
-			pManager.AddPlaneParameter("BR Plane", "BR Plane", "List of planes assosieated with the Ridgid Bodys", GH_ParamAccess.list);
+			pManager.AddPlaneParameter("BR Plane", "BR Plane", "List of planes associated with tracked rigid bodies.", GH_ParamAccess.list);
 			pManager.AddTransformParameter("RB Transform", "RB XForm", "Rigid body transforms derived from output planes.", GH_ParamAccess.list);
 			pManager.AddIntegerParameter("Frame Number", "Frame", "Latest processed NatNet frame number.", GH_ParamAccess.item);
 			pManager.AddNumberParameter("Timestamp", "Time", "Latest processed NatNet software timestamp in seconds.", GH_ParamAccess.item);
@@ -110,6 +140,9 @@ namespace Tracker {
 			pManager.AddTextParameter("Telemetry Status", "Telemetry", "Telemetry status: disabled, active, or failed.", GH_ParamAccess.item);
 		}
 
+		#endregion
+
+		#region Solve Logic
 
 		protected override void SolveInstance(IGH_DataAccess DA) {
 			bool   connect            = false;
@@ -185,7 +218,9 @@ namespace Tracker {
 			lastSolveUtc = DateTime.UtcNow;
 			SetOutputs(DA);
 		}
+		#endregion
 
+		#region NatNet Connection
 
 		private void SetOutputs(IGH_DataAccess DA) {
 			try {
@@ -260,6 +295,14 @@ namespace Tracker {
 				optiTrackClient.ConnectAsync(options, CancellationToken.None).GetAwaiter().GetResult();
 				connectionConfirmed = optiTrackClient.IsConnected;
 				if (connectionConfirmed) {
+					// Reconnect counter intentionally excludes the first successful connect.
+					if (hasConnectedOnce) {
+						reconnectCount++;
+					}
+					else {
+						hasConnectedOnce = true;
+					}
+
 					compatibilityReport = BuildCompatibilityReport(connectionType);
 					EmitCompatibilityTelemetry(compatibilityReport);
 					StartUpdateTimer();
@@ -301,6 +344,9 @@ namespace Tracker {
 			handlersAttached                  =  true;
 		}
 
+		#endregion
+
+		#region Frame Handling
 
 		private static void OnFrameReceived(object sender, OptiTrackFrameEventArgs e) {
 			if (e == null || e.Frame == null || isDeleted) {
@@ -308,6 +354,7 @@ namespace Tracker {
 			}
 
 			DateTime now = DateTime.UtcNow;
+			// NatNet callback threads must not touch Grasshopper UI state directly.
 			frameBuffer.Write(e.Frame, now);
 			lastFrameUtc = now;
 
@@ -363,6 +410,9 @@ namespace Tracker {
 			}
 		}
 
+		#endregion
+
+		#region Geometry Conversion
 
 		private static void ProcessFrameData(OptiTrackFrame frame, double scaleFactor) {
 			if (frame == null) {
@@ -399,6 +449,9 @@ namespace Tracker {
 			telemetry.CaptureMessage("grasshopper.geometry_conversion", TelemetrySeverity.Debug, new TelemetryContext().SetMetric("conversion_duration_ms", conversionWatch.Elapsed.TotalMilliseconds));
 		}
 
+		#endregion
+
+		#region Scheduling
 
 		private static void StartUpdateTimer() {
 			StopUpdateTimer();
@@ -424,9 +477,13 @@ namespace Tracker {
 			lastScheduledSolutionUtc = now;
 
 			var doc = Instances.ActiveCanvas?.Document;
+			// ScheduleSolution marshals work back through the document solve loop instead of expiring from callback threads.
 			doc?.ScheduleSolution(1, _ => { Instances.ActiveCanvas?.Document?.ExpireSolution(); });
 		}
 
+		#endregion
+
+		#region Diagnostics and Telemetry
 
 		private static List<string> BuildDiagnostics() {
 			List<string> lines = new List<string>();
@@ -497,6 +554,9 @@ namespace Tracker {
 			return split > 0 ? rhinoVersion.Substring(0, split) : rhinoVersion;
 		}
 
+		#endregion
+
+		#region Helpers
 
 		private static void AddRuntimeMessageToActiveInstances(string message, GH_RuntimeMessageLevel level) {
 			IList<IGH_DocumentObject> objects = Instances.ActiveCanvas?.Document?.Objects;
@@ -572,7 +632,9 @@ namespace Tracker {
 		private static OptiTrackConnectionType ParseConnectionType(string value) { return string.Equals(value, "Unicast", StringComparison.OrdinalIgnoreCase) ? OptiTrackConnectionType.Unicast : OptiTrackConnectionType.Multicast; }
 
 		private static bool IsMulticastText(string value) { return string.Equals(value, "Multicast", StringComparison.OrdinalIgnoreCase); }
+		#endregion
 
+		#region Disposal and Menu
 
 		protected override void RemovedFromDocument(GH_Document document) {
 			isDeleted = true;
@@ -595,6 +657,7 @@ namespace Tracker {
 
 		protected override System.Drawing.Bitmap Icon { get { return Properties.Icons.Tracker; } }
 		public override Guid ComponentGuid { get { return new Guid("D1C724B2-FEB4-405E-9570-382F8FD553F8"); } }
+		#endregion
 	}
 
 }

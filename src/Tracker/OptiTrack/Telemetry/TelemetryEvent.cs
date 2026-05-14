@@ -1,8 +1,18 @@
+/*
+ * File: TelemetryEvent.cs
+ * Purpose: Internal telemetry event payload model.
+ * Scope: Telemetry
+ * Notes: Message content is sanitized at construction.
+ */
+
 using System;
 
 
 namespace OptiTrack.Telemetry {
 
+	/// <summary>
+	/// Immutable telemetry event snapshot.
+	/// </summary>
 	public sealed class TelemetryEvent {
 
 		public TelemetryEvent(string message, TelemetrySeverity severity, TelemetryContext context) {

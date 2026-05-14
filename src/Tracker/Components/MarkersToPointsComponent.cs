@@ -11,6 +11,9 @@ using Rhino.Geometry;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Converts marker positions into Rhino points with optional scale and axis remap.
+	/// </summary>
 	public sealed class MarkersToPointsComponent : GH_Component {
 
 		public MarkersToPointsComponent() : base(

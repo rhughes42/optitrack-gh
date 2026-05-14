@@ -8,6 +8,9 @@ using OptiTrack.Telemetry;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Loads a recording JSON file into a replayable <see cref="OptiTrackRecording"/> object.
+	/// </summary>
 	public sealed class LoadOptiTrackRecordingComponent : GH_Component {
 
 		public LoadOptiTrackRecordingComponent() : base(

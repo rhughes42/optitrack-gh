@@ -10,6 +10,9 @@ using Rhino.Geometry;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Applies exponential smoothing to incoming pose/point samples.
+	/// </summary>
 	public sealed class SmoothPoseStreamComponent : GH_Component {
 
 		private static readonly ConcurrentDictionary<Guid, Plane> LastPlaneByComponent = new ConcurrentDictionary<Guid, Plane>();

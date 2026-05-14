@@ -1,5 +1,15 @@
+/*
+ * File: OptiTrackConnectionOptions.cs
+ * Purpose: Connection and stream-shaping settings for NatNet-backed clients.
+ * Scope: Core
+ * Notes: Contains user-provided network values; do not forward these directly to telemetry.
+ */
+
 namespace OptiTrack.Core {
 
+	/// <summary>
+	/// Supported NatNet connection modes.
+	/// </summary>
 	public enum OptiTrackConnectionType {
 
 		Multicast,
@@ -8,10 +18,22 @@ namespace OptiTrack.Core {
 	}
 
 
+	/// <summary>
+	/// Immutable-by-convention options used to configure an <see cref="IOptiTrackClient"/> connection.
+	/// </summary>
+	/// <remarks>
+	/// This object is populated from Grasshopper UI inputs and consumed by SDK adapters.
+	/// </remarks>
 	public sealed class OptiTrackConnectionOptions {
 
+		/// <summary>
+		/// Gets or sets the local receiver adapter address.
+		/// </summary>
 		public string LocalAddress { get; set; } = "127.0.0.1";
 
+		/// <summary>
+		/// Gets or sets the remote Motive/NatNet server address.
+		/// </summary>
 		public string ServerAddress { get; set; } = "127.0.0.1";
 
 		public OptiTrackConnectionType ConnectionType { get; set; } = OptiTrackConnectionType.Multicast;

@@ -9,6 +9,9 @@ using OptiTrack.Telemetry;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Records incoming frame objects and writes recording JSON files.
+	/// </summary>
 	public sealed class RecordOptiTrackStreamComponent : GH_Component {
 
 		private static readonly object                    sync    = new object();

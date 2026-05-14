@@ -1,3 +1,10 @@
+/*
+ * File: NatNetLatestOptiTrackClient.cs
+ * Purpose: Wrapper adapter for the newest NatNet SDK artifacts available in-repository/runtime.
+ * Scope: NatNet
+ * Notes: Preserves core models and callback behavior by delegating to the shared NatNet transport implementation.
+ */
+
 using System;
 using System.Threading;
 using System.Threading.Tasks;

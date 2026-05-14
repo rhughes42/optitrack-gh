@@ -1,7 +1,7 @@
 OptiTrack-GH Release Package
 ===========================
 
-Version: v1.10.0
+Version: v1.11.0
 
 Install
 -------
@@ -27,3 +27,4 @@ Telemetry
 - Disabled by default.
 - Optional Sentry configuration is documented in docs/sentry.md.
 - Do not commit Sentry secrets.
+

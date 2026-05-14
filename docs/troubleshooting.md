@@ -48,7 +48,7 @@ Check these items:
 
 ## Telemetry Enabled or Disabled
 
-Telemetry/error reporting is disabled by default. In v1.10.0 Sentry is available only when `Enable Telemetry` is `true` and `SENTRY_DSN` or `tracker.telemetry.local.json` is configured. Removing that configuration or setting `Enable Telemetry` to `false` disables reporting.
+Telemetry/error reporting is disabled by default. In v1.11.0 Sentry is available only when `Enable Telemetry` is `true` and `SENTRY_DSN` or `tracker.telemetry.local.json` is configured. Removing that configuration or setting `Enable Telemetry` to `false` disables reporting.
 
 Maintainers using the Codex Sentry plugin for read-only issue review should configure `SENTRY_AUTH_TOKEN` only in their local environment. That token is not required to run Tracker and must not be committed.
 
@@ -56,7 +56,7 @@ If telemetry is enabled but not configured, the component reports telemetry as d
 
 ## High CPU or UI Stutter in Grasshopper
 
-In v1.10.0, live capture is buffered and solved at a controlled cadence. If the UI still stutters:
+In v1.11.0, live capture is buffered and solved at a controlled cadence. If the UI still stutters:
 
 - Increase `Target Update Interval (ms)` (for example from `50` to `100` or `150`).
 - Keep `Redraw Every Frame` disabled unless you explicitly need per-frame redraw.
@@ -70,4 +70,5 @@ Use `Diagnostics` and `Status` together:
 
 - `frames_received=0` with `status=connected` usually means Motive is not broadcasting to the configured stream.
 - `frames_received>0` with `frames_consumed=0` usually means solves are not being scheduled (check component is active and not deleted).
+
 

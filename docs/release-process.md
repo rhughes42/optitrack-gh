@@ -19,9 +19,9 @@ Before release:
 
 1. Build locally with Rhino/Grasshopper-compatible toolchain.
 2. Create package zip with:
-   - `pwsh ./build/package.ps1 -Version 1.10.0 -Configuration Release`
+   - `pwsh ./build/package.ps1 -Version 1.11.0 -Configuration Release`
 3. If NatNet redistribution status is confirmed, optionally include SDK DLLs:
-   - `pwsh ./build/package.ps1 -Version 1.10.0 -Configuration Release -IncludeBundledNatNet`
+   - `pwsh ./build/package.ps1 -Version 1.11.0 -Configuration Release -IncludeBundledNatNet`
 4. Ensure package includes docs and examples.
 
 ## Stable v1.x Release Checklist
@@ -59,3 +59,4 @@ Verify no committed files include:
 - user paths, machine names, or IP lists
 
 Sentry release metadata must come only from environment variables or CI secrets.
+

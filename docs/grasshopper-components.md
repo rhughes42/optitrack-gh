@@ -20,7 +20,8 @@ Connects to Motive over NatNet and streams OptiTrack data into Grasshopper.
 | `Data Port`        | `1511`      | NatNet server data port.                                                                                                    |
 | `Scale Factor`     | `1.0`       | Additional scale applied to marker points and rigid body planes.                                                            |
 | `Y Up`             | `false`     | Applies the existing Y-up coordinate adjustment.                                                                            |
-| `Redraw Throttle`  | `4`         | Processes every Nth NatNet frame. Use `1` for every frame.                                                                  |
+| `Target Update Interval (ms)` | `100` | Target solve cadence in milliseconds. Lower values increase solve rate and CPU usage.                         |
+| `Redraw Every Frame` | `false` | Advanced mode that schedules solves on every incoming frame.                                                           |
 | `Debug Logging`    | `false`     | Shows extra runtime remarks, including telemetry status.                                                                    |
 | `Enable Telemetry` | `false`     | Enables optional sanitized Sentry reporting only when configured.                                                           |
 
@@ -38,6 +39,7 @@ Connects to Motive over NatNet and streams OptiTrack data into Grasshopper.
 | `Timestamp`        | Latest NatNet software timestamp in seconds.                                                       |
 | `Latency`          | Approximate seconds since the NatNet host transmit timestamp.                                      |
 | `Warnings`         | Validation and runtime warnings.                                                                   |
+| `Diagnostics`      | Aggregate frame/buffer/compatibility diagnostics, including adapter and SDK metadata.              |
 | `Telemetry Status` | `disabled`, `active`, or `failed` state.                                                           |
 
 ### Runtime Messages

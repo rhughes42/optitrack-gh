@@ -1,3 +1,10 @@
+/*
+ * File: OptiTrackRecordingSession.cs
+ * Purpose: In-memory recording accumulator for live OptiTrack frames.
+ * Scope: Replay
+ * Notes: Stores cloned frames so downstream processing does not mutate recording contents.
+ */
+
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -7,6 +14,9 @@ using OptiTrack.Core;
 
 namespace OptiTrack.Recording {
 
+	/// <summary>
+	/// Stateful recorder that captures frame snapshots and emits <see cref="OptiTrackRecording"/>.
+	/// </summary>
 	public sealed class OptiTrackRecordingSession {
 
 		private readonly List<OptiTrackFrame> frames     = new List<OptiTrackFrame>();
@@ -19,6 +29,9 @@ namespace OptiTrack.Recording {
 		}
 
 
+		/// <summary>
+		/// Starts a new recording session and clears prior captured frames.
+		/// </summary>
 		public void Start() {
 			frames.Clear();
 			startedUtc  = DateTime.UtcNow;
@@ -26,11 +39,18 @@ namespace OptiTrack.Recording {
 		}
 
 
+		/// <summary>
+		/// Stops recording while keeping captured frames in memory.
+		/// </summary>
 		public void Stop() {
 			IsRecording = false;
 		}
 
 
+		/// <summary>
+		/// Appends a frame snapshot when recording is active.
+		/// </summary>
+		/// <param name="frame">Frame to append.</param>
 		public void AppendFrame(OptiTrackFrame frame) {
 			if (!IsRecording || frame == null) {
 				return;
@@ -40,6 +60,12 @@ namespace OptiTrack.Recording {
 		}
 
 
+		/// <summary>
+		/// Builds an immutable recording payload from captured frames.
+		/// </summary>
+		/// <param name="units">Unit label for metadata.</param>
+		/// <param name="source">Source label for metadata.</param>
+		/// <returns>Recording payload ready for serialization or replay.</returns>
 		public OptiTrackRecording BuildRecording(string units, string source) {
 			if (startedUtc == DateTime.MinValue) {
 				startedUtc = DateTime.UtcNow;

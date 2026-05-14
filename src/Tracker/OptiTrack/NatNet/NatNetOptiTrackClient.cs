@@ -1,3 +1,11 @@
+/*
+ * File: NatNetOptiTrackClient.cs
+ * Purpose: Live NatNet transport client that converts SDK callbacks into Tracker domain frames.
+ * Scope: NatNet
+ * Notes: Uses SDK callback threads; frame conversion and descriptor refresh are guarded by syncRoot.
+ *        Status messages may include host-side names for local diagnostics only and must never bypass telemetry sanitization.
+ */
+
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -11,6 +19,12 @@ using OptiTrack.Telemetry;
 
 namespace OptiTrack.NatNet {
 
+	/// <summary>
+	/// NatNet SDK-backed <see cref="IOptiTrackClient"/> implementation for live Motive streams.
+	/// </summary>
+	/// <remarks>
+	/// Threading: callback handlers may be invoked on SDK threads. Consumers should not assume UI-thread events.
+	/// </remarks>
 	public sealed class NatNetOptiTrackClient : IOptiTrackClient {
 
 		private readonly object                     syncRoot = new object();
@@ -24,6 +38,7 @@ namespace OptiTrack.NatNet {
 		private          List<string>               statusMessages;
 		private          bool                       assetsChanged;
 
+		#region Construction
 
 		public NatNetOptiTrackClient(ITelemetryService telemetryService) {
 			this.telemetryService = telemetryService ?? new NoOpTelemetryService();
@@ -47,7 +62,9 @@ namespace OptiTrack.NatNet {
 		public event EventHandler<OptiTrackFrameEventArgs> FrameReceived;
 
 		public event EventHandler<OptiTrackConnectionEventArgs> ConnectionChanged;
+		#endregion
 
+		#region Connection Lifecycle
 
 		public Task ConnectAsync(OptiTrackConnectionOptions connectionOptions, CancellationToken cancellationToken) {
 			return Task.Run(() => Connect(connectionOptions, cancellationToken), cancellationToken);
@@ -130,7 +147,9 @@ namespace OptiTrack.NatNet {
 				}
 			}
 		}
+		#endregion
 
+		#region SDK Metadata Discovery
 
 		private void FetchServerDescriptor() {
 			ServerDescription serverDescription = new ServerDescription();
@@ -139,6 +158,7 @@ namespace OptiTrack.NatNet {
 			if (errorCode == 0) {
 				statusMessages.Add("Success: Connected to the server.");
 				statusMessages.Add("Server Info:");
+				// Local status output only; telemetry paths must remain sanitized and must not emit this value.
 				statusMessages.Add("Host: " + serverDescription.HostComputerName);
 				statusMessages.Add("Application Name: " + serverDescription.HostApp);
 				ConnectionInfo.HostApplication   = serverDescription.HostApp;
@@ -196,7 +216,9 @@ namespace OptiTrack.NatNet {
 				}
 			}
 		}
+		#endregion
 
+		#region Frame Handling
 
 		private void OnFrameReady(FrameOfMocapData data, NatNetClientML client) {
 			if (data.iFrame % options.FrameDivisor != 0) {
@@ -231,7 +253,9 @@ namespace OptiTrack.NatNet {
 				telemetryService.CaptureException(exception, new TelemetryContext().SetTag("operation", "natnet_frame_conversion"));
 			}
 		}
+		#endregion
 
+		#region Helpers
 
 		private void SetConnectionStatus(OptiTrackConnectionStatus status, string message) {
 			ConnectionInfo.Status = status;
@@ -247,6 +271,7 @@ namespace OptiTrack.NatNet {
 		private static ConnectionType ToNatNetConnectionType(OptiTrackConnectionType connectionType) {
 			return connectionType == OptiTrackConnectionType.Unicast ? ConnectionType.Unicast : ConnectionType.Multicast;
 		}
+		#endregion
 
 	}
 

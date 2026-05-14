@@ -1,3 +1,10 @@
+/*
+ * File: InspectSdkCompatibilityComponent.cs
+ * Purpose: Grasshopper diagnostics component for adapter/SDK compatibility visibility.
+ * Scope: Grasshopper / Diagnostics / Telemetry
+ * Notes: Emits only low-cardinality, sanitized compatibility tags when telemetry is enabled.
+ */
+
 using System;
 using System.Collections.Generic;
 
@@ -11,6 +18,9 @@ using OptiTrack.Telemetry;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Reports runtime SDK/adapter compatibility diagnostics without exposing capture payload or host identity data.
+	/// </summary>
 	public sealed class InspectSdkCompatibilityComponent : GH_Component {
 
 		public InspectSdkCompatibilityComponent() : base(
@@ -53,6 +63,7 @@ namespace Tracker.Components {
 			telemetry.CaptureMessage(
 					"sdk.compatibility",
 					TelemetrySeverity.Debug,
+					// Only compatibility metadata is emitted here; no frame payload, names, paths, or addresses.
 					new TelemetryContext().SetTag("adapter_name", report.AdapterName)
 										  .SetTag("adapter_version", report.AdapterVersion)
 										  .SetTag("natnet_assembly_version", report.NatNetAssemblyVersion)

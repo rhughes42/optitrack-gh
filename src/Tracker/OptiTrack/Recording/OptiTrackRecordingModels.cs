@@ -1,3 +1,10 @@
+/*
+ * File: OptiTrackRecordingModels.cs
+ * Purpose: Recording container models for serialization and replay.
+ * Scope: Replay
+ * Notes: Recording files may contain sensitive capture payloads and should be treated as local lab data.
+ */
+
 using System;
 using System.Collections.Generic;
 
@@ -6,6 +13,9 @@ using OptiTrack.Core;
 
 namespace OptiTrack.Recording {
 
+	/// <summary>
+	/// Serialized recording root object.
+	/// </summary>
 	public sealed class OptiTrackRecording {
 
 		public OptiTrackRecording() {
@@ -23,6 +33,9 @@ namespace OptiTrack.Recording {
 	}
 
 
+	/// <summary>
+	/// Metadata describing a recorded stream snapshot.
+	/// </summary>
 	public sealed class OptiTrackRecordingMetadata {
 
 		public string PluginVersion { get; set; } = "unknown";

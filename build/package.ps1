@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "1.10.0",
+    [string]$Version = "1.11.0",
     [string]$Configuration = "Release",
     [switch]$IncludeBundledNatNet
 )
@@ -48,3 +48,4 @@ if (-not (Test-Path $distRoot)) { New-Item -ItemType Directory -Path $distRoot |
 Compress-Archive -Path $packageRoot -DestinationPath $zipPath
 
 Write-Host "Created package: $zipPath"
+

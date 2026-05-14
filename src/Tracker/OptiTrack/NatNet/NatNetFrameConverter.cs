@@ -1,3 +1,10 @@
+/*
+ * File: NatNetFrameConverter.cs
+ * Purpose: Converts NatNet SDK frame structures into Tracker core frame models.
+ * Scope: NatNet
+ * Notes: Performs local rounding to keep stable numeric output and avoid excessive precision churn in GH.
+ */
+
 using System;
 using System.Collections.Generic;
 
@@ -8,8 +15,20 @@ using OptiTrack.Core;
 
 namespace OptiTrack.NatNet {
 
+	/// <summary>
+	/// Conversion utilities from NatNet SDK frame payloads into <see cref="OptiTrackFrame"/>.
+	/// </summary>
 	internal static class NatNetFrameConverter {
 
+		/// <summary>
+		/// Builds a transport-neutral frame model from NatNet SDK frame data.
+		/// </summary>
+		/// <param name="data">NatNet frame payload.</param>
+		/// <param name="client">NatNet client instance used for latency estimation.</param>
+		/// <param name="rigidBodyDescriptions">Known rigid body descriptor list.</param>
+		/// <param name="options">Active connection options.</param>
+		/// <param name="statusMessages">Current status message snapshot.</param>
+		/// <returns>Converted frame model.</returns>
 		internal static OptiTrackFrame ConvertFrame(FrameOfMocapData           data,
 													NatNetClientML             client,
 													IReadOnlyList<RigidBody>   rigidBodyDescriptions,

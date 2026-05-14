@@ -1,3 +1,10 @@
+/*
+ * File: OptiTrackReplayClient.cs
+ * Purpose: Replay-backed OptiTrack client that emits frames from recording files.
+ * Scope: Replay
+ * Notes: Playback loop runs on background task; emitted frames are cloned before dispatch.
+ */
+
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +15,9 @@ using OptiTrack.Telemetry;
 
 namespace OptiTrack.Recording {
 
+	/// <summary>
+	/// <see cref="IOptiTrackClient"/> implementation that replays recorded frames instead of live NatNet data.
+	/// </summary>
 	public sealed class OptiTrackReplayClient : IOptiTrackClient {
 
 		readonly object            sync = new object();

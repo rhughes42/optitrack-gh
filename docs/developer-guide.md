@@ -44,9 +44,9 @@
   - Telemetry-off default behavior
   - Safe component deletion/disposal behavior
 
-## v1.10.0 Manual Validation Checklist
+## v1.11.0 Manual Validation Checklist
 
-The repository currently does not include a standalone unit test project for Tracker internals. For v1.10.0, run this manual validation:
+The repository currently does not include a standalone unit test project for Tracker internals. For v1.11.0, run this manual validation:
 
 1. Live stream, `Target Update Interval (ms)=100`, `Redraw Every Frame=false`; verify Grasshopper stays responsive while `frames_received` grows faster than `frames_consumed`.
 2. Toggle `Redraw Every Frame=true`; verify higher update frequency and expected CPU increase.
@@ -59,4 +59,5 @@ The repository currently does not include a standalone unit test project for Tra
 
 - Release workflow: [release-process.md](release-process.md)
 - Contribution guide: `../CONTRIBUTING.md`
+
 

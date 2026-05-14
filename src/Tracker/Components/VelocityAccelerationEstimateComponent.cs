@@ -10,6 +10,9 @@ using Rhino.Geometry;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Estimates velocity and acceleration from timestamped position samples.
+	/// </summary>
 	public sealed class VelocityAccelerationEstimateComponent : GH_Component {
 
 		private sealed class MotionState {

@@ -1,8 +1,18 @@
+/*
+ * File: NoOpTelemetryService.cs
+ * Purpose: Default telemetry implementation that performs no outbound reporting.
+ * Scope: Telemetry
+ * Notes: Keeps Sentry optional and disabled unless explicitly configured.
+ */
+
 using System;
 
 
 namespace OptiTrack.Telemetry {
 
+	/// <summary>
+	/// No-op telemetry implementation used when telemetry is disabled or unavailable.
+	/// </summary>
 	public sealed class NoOpTelemetryService : ITelemetryService {
 
 		public NoOpTelemetryService() : this("disabled") { }

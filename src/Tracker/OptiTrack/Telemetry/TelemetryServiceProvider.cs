@@ -1,8 +1,18 @@
+/*
+ * File: TelemetryServiceProvider.cs
+ * Purpose: Process-wide telemetry service selector and lifecycle manager.
+ * Scope: Telemetry
+ * Notes: Switching enablement disposes prior service to avoid stale Sentry SDK instances.
+ */
+
 using System;
 
 
 namespace OptiTrack.Telemetry {
 
+	/// <summary>
+	/// Provides a singleton-style telemetry service for component-level callers.
+	/// </summary>
 	public static class TelemetryServiceProvider {
 
 		private static readonly object            SyncRoot         = new object();

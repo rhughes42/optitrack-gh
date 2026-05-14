@@ -10,6 +10,9 @@ using Rhino.Geometry;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Converts rigid body pose values into a Rhino plane.
+	/// </summary>
 	public sealed class RigidBodyToPlaneComponent : GH_Component {
 
 		public RigidBodyToPlaneComponent() : base(

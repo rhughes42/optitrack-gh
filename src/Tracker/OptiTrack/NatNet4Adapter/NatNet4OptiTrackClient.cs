@@ -1,3 +1,10 @@
+/*
+ * File: NatNet4OptiTrackClient.cs
+ * Purpose: Compatibility wrapper adapter for NatNet 4-era deployment workflows.
+ * Scope: NatNet
+ * Notes: Delegates to the shared NatNet transport implementation to preserve behavior.
+ */
+
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +16,9 @@ using OptiTrack.Telemetry;
 
 namespace OptiTrack.NatNet4Adapter {
 
+	/// <summary>
+	/// NatNet 4 compatibility adapter for <see cref="IOptiTrackClient"/>.
+	/// </summary>
 	public sealed class NatNet4OptiTrackClient : IOptiTrackClient {
 
 		public const string AdapterName = "NatNet4Adapter";

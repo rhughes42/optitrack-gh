@@ -7,6 +7,9 @@ using OptiTrack.Recording;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Reads non-sensitive metadata from a loaded recording object.
+	/// </summary>
 	public sealed class InspectRecordingMetadataComponent : GH_Component {
 
 		public InspectRecordingMetadataComponent() : base(

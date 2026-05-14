@@ -21,6 +21,7 @@ The plugin exposes an **OptiTrack Stream** live-capture component plus reusable 
 - [Troubleshooting](docs/troubleshooting.md)
 - [Telemetry Policy](docs/telemetry.md)
 - [Optional Sentry Setup](docs/sentry.md)
+- [Sentry Rules](docs/sentry-rules.md)
 - [Licensing Notes](docs/licensing.md)
 - [Documentation Index](docs/README.md)
 
@@ -64,11 +65,11 @@ See [docs/setup.md](docs/setup.md) for more detail.
 
 Create a stable release zip:
 
-`pwsh ./build/package.ps1 -Version 1.10.0 -Configuration Release`
+`pwsh ./build/package.ps1 -Version 1.11.0 -Configuration Release`
 
 To include bundled NatNet DLLs only when redistribution rights are confirmed:
 
-`pwsh ./build/package.ps1 -Version 1.10.0 -Configuration Release -IncludeBundledNatNet`
+`pwsh ./build/package.ps1 -Version 1.11.0 -Configuration Release -IncludeBundledNatNet`
 
 ## Basic Usage
 
@@ -84,7 +85,7 @@ For offline testing without Motive, use the recording/replay components document
 
 ## Known Limitations
 
-- NatNet connection mode is currently multicast in code.
+- Connection mode defaults to multicast; set component input `Connection Type` to `Unicast` when required by your Motive/network setup.
 - Local and server IP values default to `127.0.0.1`; multi-machine setups usually require explicit network adapter addresses.
 - Skeleton and force-plate paths are present but not fully implemented.
 - The project targets .NET Framework 4.8 and is intended for Rhino/Grasshopper on Windows.

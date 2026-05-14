@@ -1,3 +1,10 @@
+/*
+ * File: OptiTrackGeometryConverter.cs
+ * Purpose: Shared Rhino geometry conversion helpers for OptiTrack pose/marker data.
+ * Scope: Geometry
+ * Notes: Keeps axis remap and scale assumptions centralized for consistency across components.
+ */
+
 using System;
 using System.Collections.Generic;
 
@@ -6,6 +13,9 @@ using Rhino.Geometry;
 
 namespace OptiTrack.Geometry {
 
+	/// <summary>
+	/// Geometry conversion utilities used by Tracker components.
+	/// </summary>
 	public static class OptiTrackGeometryConverter {
 
 		public static Plane RigidBodyPoseToPlane(Point3d       origin,

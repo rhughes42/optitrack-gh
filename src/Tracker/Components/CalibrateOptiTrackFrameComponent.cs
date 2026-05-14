@@ -10,6 +10,9 @@ using Rhino.Geometry;
 
 namespace Tracker.Components {
 
+	/// <summary>
+	/// Builds a calibration transform from source/target planes and applies it to an input plane.
+	/// </summary>
 	public sealed class CalibrateOptiTrackFrameComponent : GH_Component {
 
 		public CalibrateOptiTrackFrameComponent() : base(
