@@ -22,7 +22,7 @@ namespace OptiTrack.Recording {
 
 		readonly object            sync = new object();
 		readonly ITelemetryService telemetry;
-		CancellationTokenSource    playbackCancellation;
+		CancellationTokenSource?   playbackCancellation;
 		Task                       playbackTask = Task.CompletedTask;
 		int                        currentIndex;
 		bool                       pauseRequested;
@@ -43,18 +43,18 @@ namespace OptiTrack.Recording {
 
 		public int DroppedOrLateFrames { get; private set; }
 
-		public OptiTrackRecording Recording { get; private set; }
+		public OptiTrackRecording? Recording { get; private set; }
 
 		public OptiTrackConnectionInfo ConnectionInfo { get; private set; } = new OptiTrackConnectionInfo {
 				Status = OptiTrackConnectionStatus.Disconnected, AdapterName = "ReplayClient", Message = "Replay client disconnected."
 		};
 
-		public event EventHandler<OptiTrackFrameEventArgs> FrameReceived;
+		public event EventHandler<OptiTrackFrameEventArgs>? FrameReceived;
 
-		public event EventHandler<OptiTrackConnectionEventArgs> ConnectionChanged;
+		public event EventHandler<OptiTrackConnectionEventArgs>? ConnectionChanged;
 
 
-		public void LoadRecording(OptiTrackRecording recording) {
+		public void LoadRecording(OptiTrackRecording? recording) {
 			using (telemetry.StartSpan("replay.frame_load", new TelemetryContext().SetMetric("frame_count", recording == null ? 0 : recording.Frames.Count))) {
 				Recording           = recording ?? throw new ArgumentNullException(nameof(recording));
 				currentIndex        = 0;
@@ -167,7 +167,7 @@ namespace OptiTrack.Recording {
 				OptiTrackFrame frame = Recording.Frames[frameIndex];
 
 				using (telemetry.StartSpan("replay.frame_step", new TelemetryContext().SetMetric("frame_count", frameIndex + 1))) {
-					FrameReceived?.Invoke(this, new OptiTrackFrameEventArgs(OptiTrackFrameSnapshot.Clone(frame)));
+					FrameReceived?.Invoke(this, new OptiTrackFrameEventArgs(OptiTrackFrameSnapshot.Clone(frame)!));
 				}
 
 				int    nextIndex    = frameIndex + 1;

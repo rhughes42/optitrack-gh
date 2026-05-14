@@ -52,7 +52,7 @@ namespace OptiTrack.Recording {
 			}
 
 			string             json      = File.ReadAllText(filePath);
-			OptiTrackRecording recording = JsonConvert.DeserializeObject<OptiTrackRecording>(json);
+			OptiTrackRecording? recording = JsonConvert.DeserializeObject<OptiTrackRecording>(json);
 
 			if (recording == null) {
 				throw new InvalidDataException("Recording file could not be parsed.");

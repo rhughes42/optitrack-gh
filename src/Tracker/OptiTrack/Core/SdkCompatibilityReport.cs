@@ -144,7 +144,7 @@ namespace OptiTrack.Core {
 			}
 
 			try {
-				report.SentrySdkVersion = FindAssemblyVersion("Sentry");
+				report.SentrySdkVersion = FindAssemblyVersion("Sentry", out _);
 			}
 			catch { }
 

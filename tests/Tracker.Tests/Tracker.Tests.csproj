@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
+    <AssemblyName>Tracker.Tests</AssemblyName>
+    <RootNamespace>Tracker.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +20,12 @@
 
   <ItemGroup>
     <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\\..\\src\\Tracker.Core\\Tracker.Core.csproj" />
+    <ProjectReference Include="..\\..\\src\\Tracker.Telemetry\\Tracker.Telemetry.csproj" />
+    <ProjectReference Include="..\\..\\src\\Tracker.Recording\\Tracker.Recording.csproj" />
   </ItemGroup>
 
 </Project>

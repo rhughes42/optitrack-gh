@@ -5,7 +5,7 @@ Follow this workflow before and after generating tests.
 ## Before Writing Tests
 
 1. Inspect the production code being tested.
-2. Inspect `TrackerTests/TrackerTests.csproj`.
+2. Inspect `tests/Tracker.Tests/Tracker.Tests.csproj`.
 3. Inspect `.editorconfig`.
 4. Inspect related project docs, especially `docs/developer-guide.md` and `docs/architecture.md`.
 5. Identify the real behavior contract.
@@ -18,7 +18,7 @@ Do not generate tests from guesses alone when the relevant source file is availa
 Run focused tests first:
 
 ```powershell
-dotnet test TrackerTests/TrackerTests.csproj
+dotnet test tests/Tracker.Tests/Tracker.Tests.csproj
 ```
 
 Then run broader solution tests when practical:

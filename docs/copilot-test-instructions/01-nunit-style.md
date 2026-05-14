@@ -1,6 +1,6 @@
-# NUnit Style for TrackerTests
+# NUnit Style for Tracker.Tests
 
-You are adding or updating tests in the `TrackerTests` project.
+You are adding or updating tests in the `Tracker.Tests` project.
 
 The objective is not only coverage. The objective is to protect real behavior, catch regressions early, validate contracts clearly, and make failures fast to diagnose.
 

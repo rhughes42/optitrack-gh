@@ -1,4 +1,6 @@
-﻿namespace Tracker {
+using System;
+
+namespace Tracker {
 
 	/// <summary>
 	/// Contains utility methods for the Tracker namespace.

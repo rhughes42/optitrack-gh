@@ -2,19 +2,21 @@
 
 ## Repository Areas
 
-- `src/Tracker`: plugin code and `.csproj`
-- `src/Tracker/OptiTrack/Core`: transport-neutral models and interfaces
-- `src/Tracker/OptiTrack/NatNet`: NatNet adapter layer
-- `src/Tracker/OptiTrack/Recording`: JSON recording and replay adapter
-- `src/Tracker/OptiTrack/Telemetry`: optional telemetry boundary
+- `src/Tracker`: Grasshopper plugin shell and Rhino/NatNet integration
+- `src/Tracker.Core`: transport-neutral models, utilities, interfaces, and buffering
+- `src/Tracker.Recording`: JSON recording, replay, serializer, and recording session logic
+- `src/Tracker.Telemetry`: telemetry abstractions, sanitization, and no-op implementation
+- `src/Tracker/OptiTrack/NatNet*`: NatNet adapter layer
 - `src/Tracker/Components`: composable Grasshopper components
+- `tests/Tracker.Tests`: NUnit unit tests for extracted runtime-neutral libraries
 
 ## Coding Boundaries
 
 - Keep direct `NatNetML` references inside `OptiTrack.NatNet`.
-- Keep replay/file format logic inside `OptiTrack.Recording`.
-- Keep RhinoCommon/Grasshopper-specific logic in component or tracker UI layers.
-- Keep telemetry behind `ITelemetryService`.
+- Keep replay/file format logic inside `Tracker.Recording`.
+- Keep RhinoCommon/Grasshopper-specific logic in `src/Tracker`.
+- Keep telemetry behind `ITelemetryService`, with Sentry-specific runtime wiring in the plugin shell.
+- Keep transport-neutral models and frame buffering in `Tracker.Core`.
 
 ## Extension Guidelines
 
@@ -36,6 +38,8 @@
 ## Build and Validation
 
 - Build notes: [build.md](build.md)
+- Extracted library validation can run with `dotnet build` / `dotnet test`.
+- Plugin validation should use Visual Studio MSBuild because `src/Tracker/Tracker.csproj` remains a legacy .NET Framework Grasshopper project.
 - Runtime validation should cover:
   - Live connection
   - Buffered capture vs. solve cadence behavior

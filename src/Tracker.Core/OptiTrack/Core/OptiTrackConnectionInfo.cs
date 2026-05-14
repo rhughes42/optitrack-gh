@@ -68,7 +68,7 @@ namespace OptiTrack.Core {
 		public string AdapterName {
 			get;
 			set;
-		}
+		} = string.Empty;
 
 		/// <summary>
 		/// Gets or sets human-readable status message for local UI.
@@ -76,7 +76,7 @@ namespace OptiTrack.Core {
 		public string Message {
 			get;
 			set;
-		}
+		} = string.Empty;
 
 	}
 

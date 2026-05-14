@@ -21,7 +21,7 @@ namespace OptiTrack.Core {
 	public sealed class LatestFrameBuffer {
 
 		readonly object sync = new object();
-		OptiTrackFrame  latestFrame;
+		OptiTrackFrame? latestFrame;
 		DateTime        latestReceivedUtc = DateTime.MinValue;
 		long            latestSequence;
 		long            lastConsumedSequence;
@@ -57,7 +57,7 @@ namespace OptiTrack.Core {
 		/// <returns>True when a frame is available; otherwise false.</returns>
 		public bool TryConsumeLatest(out OptiTrackFrame frame, out DateTime receivedUtc, out bool skippedIntermediateFrames) {
 			lock (sync) {
-				frame       = latestFrame;
+				frame       = latestFrame!;
 				receivedUtc = latestReceivedUtc;
 
 				if (frame == null) {

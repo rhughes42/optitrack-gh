@@ -8,7 +8,7 @@ namespace OptiTrack.Recording {
 
 	static class OptiTrackFrameSnapshot {
 
-		public static OptiTrackFrame Clone(OptiTrackFrame frame) {
+		public static OptiTrackFrame? Clone(OptiTrackFrame? frame) {
 			if (frame == null) {
 				return null;
 			}

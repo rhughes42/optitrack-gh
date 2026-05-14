@@ -48,7 +48,7 @@ namespace OptiTrack.Telemetry {
 				"model_name",
 				"project_name"
 		};
-		// Explicitly allowed low-cardinality keys that remain safe even if they contain sensitive substrings (for example marker_count).
+
 		static readonly HashSet<string> SafeKeyAllowList = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
 				"adapter_name",
 				"adapter_version",

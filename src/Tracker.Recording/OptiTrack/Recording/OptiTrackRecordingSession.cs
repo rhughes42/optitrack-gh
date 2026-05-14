@@ -51,12 +51,12 @@ namespace OptiTrack.Recording {
 		/// Appends a frame snapshot when recording is active.
 		/// </summary>
 		/// <param name="frame">Frame to append.</param>
-		public void AppendFrame(OptiTrackFrame frame) {
+		public void AppendFrame(OptiTrackFrame? frame) {
 			if (!IsRecording || (frame == null)) {
 				return;
 			}
 
-			frames.Add(OptiTrackFrameSnapshot.Clone(frame));
+			frames.Add(OptiTrackFrameSnapshot.Clone(frame)!);
 		}
 
 

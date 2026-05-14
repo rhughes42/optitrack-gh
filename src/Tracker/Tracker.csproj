@@ -52,6 +52,9 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Resources.Extensions">
+      <HintPath>$(PkgSystem_Resources_Extensions)\lib\net462\System.Resources.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
@@ -78,38 +81,31 @@
     <Compile Include="Components\VelocityAccelerationEstimateComponent.cs" />
     <Compile Include="OptiTrack\Geometry\AxisRemapMode.cs" />
     <Compile Include="OptiTrack\Geometry\OptiTrackGeometryConverter.cs" />
-    <Compile Include="OptiTrack\Core\IOptiTrackClient.cs" />
-    <Compile Include="OptiTrack\Core\LatestFrameBuffer.cs" />
-    <Compile Include="OptiTrack\Core\OptiTrackConnectionInfo.cs" />
-    <Compile Include="OptiTrack\Core\OptiTrackConnectionOptions.cs" />
-    <Compile Include="OptiTrack\Core\OptiTrackConnectionStatus.cs" />
-    <Compile Include="OptiTrack\Core\OptiTrackEventArgs.cs" />
-    <Compile Include="OptiTrack\Core\OptiTrackModels.cs" />
     <Compile Include="OptiTrack\Core\SdkCompatibilityReport.cs" />
-    <Compile Include="OptiTrack\Core\TrackerLogger.cs" />
     <Compile Include="OptiTrack\NatNet\NatNetFrameConverter.cs" />
     <Compile Include="OptiTrack\NatNet\NatNetOptiTrackClient.cs" />
     <Compile Include="OptiTrack\NatNet4Adapter\NatNet4OptiTrackClient.cs" />
     <Compile Include="OptiTrack\NatNetLatestAdapter\NatNetLatestOptiTrackClient.cs" />
-    <Compile Include="OptiTrack\Recording\OptiTrackFrameSnapshot.cs" />
-    <Compile Include="OptiTrack\Recording\OptiTrackRecordingModels.cs" />
-    <Compile Include="OptiTrack\Recording\OptiTrackRecordingSerializer.cs" />
-    <Compile Include="OptiTrack\Recording\OptiTrackRecordingSession.cs" />
-    <Compile Include="OptiTrack\Recording\OptiTrackReplayClient.cs" />
-    <Compile Include="OptiTrack\Telemetry\ITelemetryService.cs" />
-    <Compile Include="OptiTrack\Telemetry\NoOpTelemetryService.cs" />
     <Compile Include="OptiTrack\Telemetry\SentryTelemetryOptions.cs" />
     <Compile Include="OptiTrack\Telemetry\SentryTelemetryService.cs" />
-    <Compile Include="OptiTrack\Telemetry\TelemetryContext.cs" />
-    <Compile Include="OptiTrack\Telemetry\TelemetryEvent.cs" />
-    <Compile Include="OptiTrack\Telemetry\TelemetrySanitizer.cs" />
-    <Compile Include="OptiTrack\Telemetry\TelemetryScope.cs" />
     <Compile Include="OptiTrack\Telemetry\TelemetryServiceProvider.cs" />
-    <Compile Include="OptiTrack\Telemetry\TelemetrySeverity.cs" />
     <Compile Include="TrackerComponent.cs" />
     <Compile Include="TrackerInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utlities.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Tracker.Core\Tracker.Core.csproj">
+      <Project>{B8A1A95E-3F91-4A3D-8870-1E14B65A6E72}</Project>
+      <Name>Tracker.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tracker.Telemetry\Tracker.Telemetry.csproj">
+      <Project>{68D7A0AF-F5C2-4561-8E12-FFBA4D6D706E}</Project>
+      <Name>Tracker.Telemetry</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Tracker.Recording\Tracker.Recording.csproj">
+      <Project>{E7D0282D-2203-42D7-AEC3-8C98A2DA3E0D}</Project>
+      <Name>Tracker.Recording</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
@@ -135,6 +131,7 @@
       <Version>13.0.3</Version>
     </PackageReference>
     <PackageReference Include="Sentry" Version="6.5.0" />
+    <PackageReference Include="System.Resources.Extensions" Version="8.0.0" GeneratePathProperty="true" />
     <PackageReference Include="System.Collections.Immutable" Version="7.0.0" />
     <PackageReference Include="System.Net.Http">
       <Version>4.3.4</Version>
@@ -174,6 +171,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <FallbackCulture>en-US</FallbackCulture>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartProgram>C:\Program Files\Rhino 8\System\Rhino.exe</StartProgram>

@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using Tracker;
 
-namespace TrackerTests
+namespace Tracker.Tests
 {
 	[TestFixture]
 	public class UtilitiesTests
