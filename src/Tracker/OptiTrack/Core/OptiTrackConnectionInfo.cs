@@ -16,6 +16,10 @@ namespace OptiTrack.Core {
 
 		public string NatNetVersion { get; set; } = string.Empty;
 
+		public int ServerCommandPort { get; set; }
+
+		public int ServerDataPort { get; set; }
+
 		public bool IsConnected {
 			get { return Status == OptiTrackConnectionStatus.Connected; }
 		}

@@ -56,6 +56,10 @@ namespace OptiTrack.Core {
 
 		public int FrameNumber { get; set; }
 
+		public double TimestampSeconds { get; set; }
+
+		public double LatencySeconds { get; set; }
+
 		public bool IsRecording { get; set; }
 
 		public bool AssetsChanged { get; set; }

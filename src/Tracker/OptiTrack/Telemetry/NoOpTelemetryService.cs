@@ -4,6 +4,16 @@ namespace OptiTrack.Telemetry {
 
 	public sealed class NoOpTelemetryService : ITelemetryService {
 
+		public NoOpTelemetryService()
+			: this( "disabled" ) {
+		}
+
+		public NoOpTelemetryService( string status ) {
+			Status = status;
+		}
+
+		public string Status { get; private set; }
+
 		public void CaptureException( Exception exception, TelemetryContext context ) {
 		}
 

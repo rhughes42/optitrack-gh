@@ -13,6 +13,7 @@
 *.local.json
 *.local.config
 sentry.properties
+tracker.telemetry.local.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

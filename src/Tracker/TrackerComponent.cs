@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -17,12 +19,18 @@ namespace Tracker {
 	/// The main tracker component.
 	/// </summary>
 	public class TrackerComponent : GH_Component {
-		private static readonly ITelemetryService Telemetry = new NoOpTelemetryService();
-		private static IOptiTrackClient optiTrackClient = CreateClient();
+		private const int YUpInputIndex = 8;
+		private const double NoFrameWarningThresholdSeconds = 5.0;
+
+		private static ITelemetryService telemetry = new NoOpTelemetryService();
+		private static IOptiTrackClient optiTrackClient = CreateClient( telemetry );
 		private static OptiTrackFrame currentFrame;
+		private static DateTime connectionStartedUtc = DateTime.MinValue;
+		private static DateTime lastFrameUtc = DateTime.MinValue;
+		private static bool noFrameWarningReported;
 		private static bool handlersAttached;
 		private static bool connectionConfirmed;
-		private static int counter;
+		private static bool telemetryEnabled;
 
 		private static bool RigidBody;
 		private static bool Skeleton;
@@ -34,24 +42,34 @@ namespace Tracker {
 		protected static List<string> mLabels = new List<string>();
 		private static readonly List<string> rBodyNames = new List<string>();
 		private static readonly List<Plane> rBodyPlanes = new List<Plane>();
+		private static readonly List<Transform> rBodyTransforms = new List<Transform>();
+		private static readonly List<string> warnings = new List<string>();
 
 		public TrackerComponent()
 			: base( "OptiTrack Stream",
 						"OptiTrack Stream",
-						"Receive streaming data from a running Motive broadcast.",
+						"Connect to Motive over NatNet and stream OptiTrack data into Grasshopper.",
 						"Tracker",
 						"OptiTrack" ) {
 		}
 
-		private static IOptiTrackClient CreateClient() {
-			return new NatNetOptiTrackClient( Telemetry );
+		private static IOptiTrackClient CreateClient( ITelemetryService telemetryService ) {
+			return new NatNetOptiTrackClient( telemetryService );
 		}
 
 		protected override void RegisterInputParams( GH_InputParamManager pManager ) {
-			pManager.AddBooleanParameter( "Activate", "Activate", "Activate the streaming module.", GH_ParamAccess.item, false );
-			pManager.AddBooleanParameter( "Reset", "Reset", "Reset the streaming module.", GH_ParamAccess.item, false );
-			pManager.AddTextParameter( "Local IP", "Local IP", "IP address for the receiver.", GH_ParamAccess.item, "127.0.0.1" );
-			pManager.AddTextParameter( "Server IP", "Server IP", "IP address for the server.", GH_ParamAccess.item, "127.0.0.1" );
+			pManager.AddBooleanParameter( "Connect", "Connect", "Connect to the Motive NatNet stream.", GH_ParamAccess.item, false );
+			pManager.AddBooleanParameter( "Reset", "Reset", "Reset the streaming client and clear cached frame data.", GH_ParamAccess.item, false );
+			pManager.AddTextParameter( "Local IP", "Local IP", "IP address for the receiver network adapter.", GH_ParamAccess.item, "127.0.0.1" );
+			pManager.AddTextParameter( "Server IP", "Server IP", "IP address for the Motive server.", GH_ParamAccess.item, "127.0.0.1" );
+			pManager.AddTextParameter( "Connection Type", "Type", "NatNet connection type: Multicast or Unicast.", GH_ParamAccess.item, "Multicast" );
+			pManager.AddIntegerParameter( "Command Port", "Cmd Port", "NatNet server command port.", GH_ParamAccess.item, 1510 );
+			pManager.AddIntegerParameter( "Data Port", "Data Port", "NatNet server data port.", GH_ParamAccess.item, 1511 );
+			pManager.AddNumberParameter( "Scale Factor", "Scale", "Additional scale factor applied to marker points and rigid body planes.", GH_ParamAccess.item, 1.0 );
+			pManager.AddBooleanParameter( "Y Up", "Y Up", "Apply the existing Y-up coordinate adjustment.", GH_ParamAccess.item, false );
+			pManager.AddIntegerParameter( "Redraw Throttle", "Throttle", "Process every Nth NatNet frame. Use 1 for every frame.", GH_ParamAccess.item, 4 );
+			pManager.AddBooleanParameter( "Debug Logging", "Debug", "Show additional component runtime remarks.", GH_ParamAccess.item, false );
+			pManager.AddBooleanParameter( "Enable Telemetry", "Telemetry", "Enable optional sanitized Sentry error reporting when configured.", GH_ParamAccess.item, false );
 		}
 
 		protected override void RegisterOutputParams( GH_OutputParamManager pManager ) {
@@ -60,15 +78,29 @@ namespace Tracker {
 			pManager.AddTextParameter( "Labels", "Labels", "Marker labels.", GH_ParamAccess.list );
 			pManager.AddTextParameter( "RB Name", "RB Name", "List of Rigid Body name data.", GH_ParamAccess.list );
 			pManager.AddPlaneParameter( "BR Plane", "BR Plane", "List of planes assosieated with the Ridgid Bodys", GH_ParamAccess.list );
+			pManager.AddTransformParameter( "RB Transform", "RB XForm", "Rigid body transforms derived from output planes.", GH_ParamAccess.list );
+			pManager.AddIntegerParameter( "Frame Number", "Frame", "Latest processed NatNet frame number.", GH_ParamAccess.item );
+			pManager.AddNumberParameter( "Timestamp", "Time", "Latest processed NatNet software timestamp in seconds.", GH_ParamAccess.item );
+			pManager.AddNumberParameter( "Latency", "Latency", "Approximate seconds since NatNet host transmit timestamp.", GH_ParamAccess.item );
+			pManager.AddTextParameter( "Warnings", "Warnings", "Validation and runtime warnings.", GH_ParamAccess.list );
+			pManager.AddTextParameter( "Telemetry Status", "Telemetry", "Telemetry status: disabled, active, or failed.", GH_ParamAccess.item );
 		}
 
 		protected override void SolveInstance( IGH_DataAccess DA ) {
-			bool activate = false;
+			bool connect = false;
 			bool reset = false;
 			string localIP = "127.0.0.1";
 			string serverIP = "127.0.0.1";
+			string connectionTypeText = "Multicast";
+			int commandPort = 1510;
+			int dataPort = 1511;
+			double scaleFactor = 1.0;
+			bool yUpInput = yUp;
+			int redrawThrottle = 4;
+			bool debugLogging = false;
+			bool enableTelemetry = false;
 
-			if ( !DA.GetData( 0, ref activate ) )
+			if ( !DA.GetData( 0, ref connect ) )
 				return;
 			if ( !DA.GetData( 1, ref reset ) )
 				return;
@@ -77,67 +109,157 @@ namespace Tracker {
 			if ( !DA.GetData( 3, ref serverIP ) )
 				return;
 
+			DA.GetData( 4, ref connectionTypeText );
+			DA.GetData( 5, ref commandPort );
+			DA.GetData( 6, ref dataPort );
+			DA.GetData( 7, ref scaleFactor );
+			DA.GetData( 8, ref yUpInput );
+			DA.GetData( 9, ref redrawThrottle );
+			DA.GetData( 10, ref debugLogging );
+			DA.GetData( 11, ref enableTelemetry );
+
+			warnings.Clear();
+			if ( Params.Input[ YUpInputIndex ].SourceCount > 0 ) {
+				yUp = yUpInput;
+			}
+			ConfigureTelemetry( enableTelemetry );
+
+			OptiTrackConnectionType connectionType = ParseConnectionType( connectionTypeText );
+			bool valid = ValidateConfiguration( localIP, serverIP, commandPort, dataPort, scaleFactor, redrawThrottle, connectionTypeText );
+			foreach ( string warning in warnings ) {
+				AddRuntimeMessage( GH_RuntimeMessageLevel.Warning, warning );
+			}
+
+			if ( !valid ) {
+				AddRuntimeMessage( GH_RuntimeMessageLevel.Error, "Tracker configuration is invalid. Fix warnings before connecting." );
+				telemetry.CaptureMessage( "invalid_tracker_configuration", TelemetrySeverity.Warning, new TelemetryContext().SetTag( "operation", "component_validation" ) );
+				SetOutputs( DA );
+				return;
+			}
+
 			if ( reset ) {
 				ClearFrameState();
 				DisconnectClient();
-				counter = 0;
+				AddRuntimeMessage( GH_RuntimeMessageLevel.Remark, "Tracker client reset." );
 			}
 
-			if ( activate && counter == 0 ) {
-				ConnectClient( localIP, serverIP );
-				counter++;
-			} else if ( activate && connectionConfirmed ) {
-				ProcessFrameData( currentFrame );
-				counter++;
-			} else if ( !activate ) {
+			if ( connect && !connectionConfirmed ) {
+				ConnectClient( localIP, serverIP, connectionType, commandPort, dataPort, redrawThrottle );
+			} else if ( connect && connectionConfirmed ) {
+				ProcessFrameData( currentFrame, scaleFactor );
+				ReportNoFrameWarning();
+			} else if ( !connect ) {
 				DisconnectClient();
 				ClearFrameState();
-				Log.Add( "Service stopped. Activate module to begin streaming." );
+				Log.Add( "Service stopped. Set Connect to true to begin streaming." );
 			}
 
+			if ( debugLogging ) {
+				AddRuntimeMessage( GH_RuntimeMessageLevel.Remark, "Telemetry: " + telemetry.Status );
+			}
+
+			SetOutputs( DA );
+			if ( connect ) {
+				ExpireSolution( true );
+			}
+		}
+
+		private void SetOutputs( IGH_DataAccess DA ) {
 			try {
 				DA.SetDataList( "Status", Log );
 				DA.SetDataList( "Markers", mPoints );
 				DA.SetDataList( "Labels", mLabels );
 				DA.SetDataList( "RB Name", rBodyNames );
 				DA.SetDataList( "BR Plane", rBodyPlanes );
+				DA.SetDataList( "RB Transform", rBodyTransforms );
+				DA.SetData( "Frame Number", currentFrame == null ? 0 : currentFrame.FrameNumber );
+				DA.SetData( "Timestamp", currentFrame == null ? 0.0 : currentFrame.TimestampSeconds );
+				DA.SetData( "Latency", currentFrame == null ? 0.0 : currentFrame.LatencySeconds );
+				DA.SetDataList( "Warnings", warnings );
+				DA.SetData( "Telemetry Status", telemetry.Status );
 			} catch ( Exception exception ) {
-				Telemetry.CaptureException( exception, new TelemetryContext().SetTag( "operation", "grasshopper_set_output" ) );
+				telemetry.CaptureException( exception, new TelemetryContext().SetTag( "operation", "grasshopper_set_output" ) );
+				AddRuntimeMessage( GH_RuntimeMessageLevel.Error, "Failed to set Tracker outputs." );
 			}
-
-			ExpireSolution( true );
 		}
 
-		private static void ConnectClient( string localIP, string serverIP ) {
+		private static void ConfigureTelemetry( bool enableTelemetry ) {
+			if ( telemetryEnabled == enableTelemetry ) {
+				return;
+			}
+
+			telemetryEnabled = enableTelemetry;
+			IDisposable disposableTelemetry = telemetry as IDisposable;
+			if ( disposableTelemetry != null ) {
+				disposableTelemetry.Dispose();
+			}
+
+			telemetry = SentryTelemetryService.Create( enableTelemetry );
+			bool wasConnected = optiTrackClient != null && optiTrackClient.IsConnected;
+			if ( wasConnected ) {
+				DisconnectClient();
+				Log.Add( "Telemetry setting changed. Reconnecting to apply updated telemetry." );
+				connectionStartedUtc = DateTime.UtcNow;
+				lastFrameUtc = DateTime.MinValue;
+				currentFrame = null;
+			}
+
+			ResetClient();
+		}
+
+		private static void ResetClient() {
+			if ( optiTrackClient != null && handlersAttached ) {
+				optiTrackClient.FrameReceived -= OnFrameReceived;
+				optiTrackClient.ConnectionChanged -= OnConnectionChanged;
+			}
+
+			optiTrackClient = CreateClient( telemetry );
+			handlersAttached = false;
+		}
+
+		private static void ConnectClient( string localIP, string serverIP, OptiTrackConnectionType connectionType, int commandPort, int dataPort, int redrawThrottle ) {
 			EnsureClientHandlers();
 			Log.Clear();
 			Log.Add( "NatNet managed client application starting..." );
 			Log.Add( "Local IP set." );
 			Log.Add( "Server IP set." );
-			Log.Add( "Attempting connection to server..." );
+			Log.Add( "Attempting connection to Motive NatNet server..." );
+			connectionStartedUtc = DateTime.UtcNow;
+			lastFrameUtc = DateTime.MinValue;
+			noFrameWarningReported = false;
 
 			OptiTrackConnectionOptions options = new OptiTrackConnectionOptions {
 				LocalAddress = localIP,
 				ServerAddress = serverIP,
-				ConnectionType = OptiTrackConnectionType.Multicast,
+				ConnectionType = connectionType,
+				ServerCommandPort = commandPort,
+				ServerDataPort = dataPort,
 				IncludeMarkers = true,
 				IncludeRigidBodies = RigidBody,
 				IncludeSkeletons = Skeleton,
 				IncludeForcePlates = ForcePlate,
-				FrameDivisor = 4
+				FrameDivisor = redrawThrottle
 			};
 
 			try {
 				optiTrackClient.ConnectAsync( options, CancellationToken.None ).GetAwaiter().GetResult();
 				connectionConfirmed = optiTrackClient.IsConnected;
 				if ( connectionConfirmed ) {
-					Log.Add( "Fetching the Frame Data." );
-					Log.Add( "Success: Data Port Connected." );
+					Log.Add( "Fetching frame data." );
+					Log.Add( "Success: Data port connected." );
 				}
+			} catch ( FileNotFoundException exception ) {
+				connectionConfirmed = false;
+				Log.Add( "Error: NatNet dependency is missing. Check NatNetML.dll and NatNetLib.dll next to Tracker.gha." );
+				telemetry.CaptureException( exception, new TelemetryContext().SetTag( "operation", "component_connect_missing_dependency" ) );
+			} catch ( BadImageFormatException exception ) {
+				connectionConfirmed = false;
+				Log.Add( "Error: NatNet dependency architecture mismatch. Use x64 NatNet DLLs with Rhino 8." );
+				telemetry.CaptureException( exception, new TelemetryContext().SetTag( "operation", "component_connect_bad_image" ) );
 			} catch ( Exception exception ) {
 				connectionConfirmed = false;
-				Log.Add( "Error: Failed to connect. Check the connection settings." );
-				Telemetry.CaptureException( exception, new TelemetryContext().SetTag( "operation", "component_connect" ) );
+				Log.Add( "Error: Failed to connect. Check Motive broadcast settings, IP addresses, ports, firewall, and connection type." );
+				telemetry.CaptureException( exception, new TelemetryContext().SetTag( "operation", "component_connect" ) );
 			}
 		}
 
@@ -163,6 +285,8 @@ namespace Tracker {
 
 		private static void OnFrameReceived( object sender, OptiTrackFrameEventArgs e ) {
 			currentFrame = e.Frame;
+			lastFrameUtc = DateTime.UtcNow;
+			noFrameWarningReported = false;
 		}
 
 		private static void OnConnectionChanged( object sender, OptiTrackConnectionEventArgs e ) {
@@ -178,9 +302,12 @@ namespace Tracker {
 			mLabels.Clear();
 			rBodyNames.Clear();
 			rBodyPlanes.Clear();
+			rBodyTransforms.Clear();
+			warnings.Clear();
+			noFrameWarningReported = false;
 		}
 
-		private static void ProcessFrameData( OptiTrackFrame frame ) {
+		private void ProcessFrameData( OptiTrackFrame frame, double scaleFactor ) {
 			if ( frame == null ) {
 				return;
 			}
@@ -189,6 +316,7 @@ namespace Tracker {
 			mLabels.Clear();
 			rBodyNames.Clear();
 			rBodyPlanes.Clear();
+			rBodyTransforms.Clear();
 
 			Log.Clear();
 			foreach ( string message in frame.StatusMessages ) {
@@ -197,6 +325,7 @@ namespace Tracker {
 
 			foreach ( OptiTrackMarker marker in frame.Markers ) {
 				mLabels.Add( marker.Label );
+				mPoints.Add( new Point3d( marker.X * scaleFactor, marker.Y * scaleFactor, marker.Z * scaleFactor ) );
 			}
 
 			if ( RigidBody ) {
@@ -206,12 +335,14 @@ namespace Tracker {
 					}
 
 					rBodyNames.Add( rigidBody.Name );
-					rBodyPlanes.Add( CreateRigidBodyPlane( rigidBody ) );
+					Plane plane = CreateRigidBodyPlane( rigidBody, scaleFactor );
+					rBodyPlanes.Add( plane );
+					rBodyTransforms.Add( Transform.PlaneToPlane( Plane.WorldXY, plane ) );
 				}
 			}
 		}
 
-		private static Plane CreateRigidBodyPlane( OptiTrackRigidBody rigidBody ) {
+		private static Plane CreateRigidBodyPlane( OptiTrackRigidBody rigidBody, double scaleFactor ) {
 			Quaternion rbQuat = new Quaternion( rigidBody.Qw, rigidBody.Qx, rigidBody.Qy, rigidBody.Qz );
 			rbQuat.GetRotation( out Plane rbPlane );
 			rbPlane.Origin = new Point3d( rigidBody.X, rigidBody.Y, rigidBody.Z );
@@ -219,6 +350,10 @@ namespace Tracker {
 			var doc = Rhino.RhinoDoc.ActiveDoc;
 			if ( doc != null && doc.ModelUnitSystem == Rhino.UnitSystem.Millimeters ) {
 				rbPlane.Transform( Transform.Scale( new Point3d( 0, 0, 0 ), 1000 ) );
+			}
+
+			if ( Math.Abs( scaleFactor - 1.0 ) > 0.000001 ) {
+				rbPlane.Transform( Transform.Scale( new Point3d( 0, 0, 0 ), scaleFactor ) );
 			}
 
 			Transform xformYup = new Transform();
@@ -237,6 +372,104 @@ namespace Tracker {
 
 			rbPlane.Transform( xRotate );
 			return rbPlane;
+		}
+
+		private bool ValidateConfiguration( string localIP, string serverIP, int commandPort, int dataPort, double scaleFactor, int redrawThrottle, string connectionTypeText ) {
+			bool valid = true;
+
+			if ( !IPAddress.TryParse( localIP, out _ ) ) {
+				warnings.Add( "Local IP address is invalid." );
+				valid = false;
+			}
+
+			if ( !IPAddress.TryParse( serverIP, out _ ) ) {
+				warnings.Add( "Server IP address is invalid." );
+				valid = false;
+			}
+
+			if ( !IsValidPort( commandPort ) ) {
+				warnings.Add( "Command port must be between 1 and 65535." );
+				valid = false;
+			}
+
+			if ( !IsValidPort( dataPort ) ) {
+				warnings.Add( "Data port must be between 1 and 65535." );
+				valid = false;
+			}
+
+			if ( commandPort == dataPort ) {
+				warnings.Add( "Command port and data port should be different." );
+				valid = false;
+			}
+
+			if ( scaleFactor <= 0 ) {
+				warnings.Add( "Scale factor must be greater than zero." );
+				valid = false;
+			}
+
+			if ( redrawThrottle < 1 ) {
+				warnings.Add( "Redraw throttle must be 1 or greater." );
+				valid = false;
+			}
+
+			if ( ParseConnectionType( connectionTypeText ) == OptiTrackConnectionType.Multicast && !IsMulticastText( connectionTypeText ) ) {
+				warnings.Add( "Connection type was not recognized. Using Multicast." );
+			}
+
+			if ( !NatNetDependenciesPresent() ) {
+				warnings.Add( "NatNetML.dll or NatNetLib.dll is missing from the plugin output folder." );
+				valid = false;
+			}
+
+			if ( telemetryEnabled && telemetry.Status.StartsWith( "disabled", StringComparison.OrdinalIgnoreCase ) ) {
+				warnings.Add( "Telemetry was enabled, but Sentry is not configured. Set SENTRY_DSN or tracker.telemetry.local.json to activate it." );
+			}
+
+			return valid;
+		}
+
+		private void ReportNoFrameWarning() {
+			if ( currentFrame != null || connectionStartedUtc == DateTime.MinValue ) {
+				return;
+			}
+
+			if ( DateTime.UtcNow.Subtract( connectionStartedUtc ).TotalSeconds > NoFrameWarningThresholdSeconds ) {
+				string warning = "Connected, but no NatNet frame has been received. Check Motive broadcasting, firewall, IP addresses, ports, and multicast/unicast settings.";
+				warnings.Add( warning );
+				if ( !noFrameWarningReported ) {
+					AddRuntimeMessage( GH_RuntimeMessageLevel.Warning, warning );
+					noFrameWarningReported = true;
+				}
+			}
+		}
+
+		private static bool IsValidPort( int port ) {
+			return port >= 1 && port <= 65535;
+		}
+
+		private static bool NatNetDependenciesPresent() {
+			string assemblyLocation = typeof( TrackerComponent ).Assembly.Location;
+			string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+			if ( !string.IsNullOrWhiteSpace( assemblyLocation ) ) {
+				string assemblyDirectory = Path.GetDirectoryName( assemblyLocation );
+				if ( !string.IsNullOrWhiteSpace( assemblyDirectory ) ) {
+					baseDirectory = assemblyDirectory;
+				}
+			}
+
+			return File.Exists( Path.Combine( baseDirectory, "NatNetML.dll" ) ) && File.Exists( Path.Combine( baseDirectory, "NatNetLib.dll" ) );
+		}
+
+		private static OptiTrackConnectionType ParseConnectionType( string value ) {
+			if ( string.Equals( value, "Unicast", StringComparison.OrdinalIgnoreCase ) ) {
+				return OptiTrackConnectionType.Unicast;
+			}
+
+			return OptiTrackConnectionType.Multicast;
+		}
+
+		private static bool IsMulticastText( string value ) {
+			return string.Equals( value, "Multicast", StringComparison.OrdinalIgnoreCase );
 		}
 
 		protected override void AppendAdditionalComponentMenuItems( ToolStripDropDown menu ) {
