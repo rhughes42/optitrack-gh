@@ -6,7 +6,7 @@ namespace OptiTrack.Core {
 
 	public sealed class TrackerLogger {
 
-		private readonly object       sync = new object();
+		private readonly object       sync    = new object();
 		private readonly List<string> entries = new List<string>();
 
 		public bool DebugEnabled { get; set; }

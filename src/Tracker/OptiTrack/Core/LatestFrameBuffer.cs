@@ -6,7 +6,7 @@ namespace OptiTrack.Core {
 
 	public sealed class LatestFrameBuffer {
 
-		private readonly object sync = new object();
+		private readonly object         sync = new object();
 		private          OptiTrackFrame latestFrame;
 		private          DateTime       latestReceivedUtc = DateTime.MinValue;
 		private          long           latestSequence;

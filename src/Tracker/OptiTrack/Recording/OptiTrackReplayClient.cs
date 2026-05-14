@@ -10,12 +10,12 @@ namespace OptiTrack.Recording {
 
 	public sealed class OptiTrackReplayClient : IOptiTrackClient {
 
-		readonly object         sync = new object();
+		readonly object            sync = new object();
 		readonly ITelemetryService telemetry;
-		CancellationTokenSource playbackCancellation;
-		Task                    playbackTask = Task.CompletedTask;
-		int                     currentIndex;
-		bool                    pauseRequested;
+		CancellationTokenSource    playbackCancellation;
+		Task                       playbackTask = Task.CompletedTask;
+		int                        currentIndex;
+		bool                       pauseRequested;
 
 		public OptiTrackReplayClient() : this(new NoOpTelemetryService()) { }
 
@@ -23,6 +23,7 @@ namespace OptiTrack.Recording {
 		public OptiTrackReplayClient(ITelemetryService telemetryService) {
 			telemetry = telemetryService ?? new NoOpTelemetryService();
 		}
+
 
 		public bool LoopPlayback { get; set; }
 
@@ -154,6 +155,7 @@ namespace OptiTrack.Recording {
 				}
 
 				OptiTrackFrame frame = Recording.Frames[frameIndex];
+
 				using (telemetry.StartSpan("replay.frame_step", new TelemetryContext().SetMetric("frame_count", frameIndex + 1))) {
 					FrameReceived?.Invoke(this, new OptiTrackFrameEventArgs(OptiTrackFrameSnapshot.Clone(frame)));
 				}
