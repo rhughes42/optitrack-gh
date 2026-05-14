@@ -10,6 +10,7 @@ using Grasshopper.Kernel;
 
 using OptiTrack.Core;
 using OptiTrack.NatNet4Adapter;
+using OptiTrack.NatNetLatestAdapter;
 using OptiTrack.Telemetry;
 
 using Rhino;
@@ -43,7 +44,8 @@ namespace Tracker {
 		private static          DateTime          lastSolveUtc = DateTime.MinValue;
 		private static          DateTime          lastScheduledSolutionUtc = DateTime.MinValue;
 		private static          DateTime          lastFrameUtc = DateTime.MinValue;
-		private static          SdkCompatibilityReport compatibilityReport = SdkCompatibilityReport.Collect(NatNet4OptiTrackClient.AdapterName, "Multicast");
+		private static          string                 selectedAdapterName = NatNet4OptiTrackClient.AdapterName;
+		private static          SdkCompatibilityReport compatibilityReport = NatNet4OptiTrackClient.BuildCompatibilityReport(OptiTrackConnectionType.Multicast);
 
 		private static bool RigidBody;
 		private static bool Skeleton;
@@ -63,6 +65,15 @@ namespace Tracker {
 
 
 		private static IOptiTrackClient CreateClient(ITelemetryService telemetryService) {
+			string mode = (Environment.GetEnvironmentVariable("TRACKER_NATNET_ADAPTER") ?? string.Empty).Trim();
+
+			if (string.Equals(mode, "latest", StringComparison.OrdinalIgnoreCase)
+				|| string.Equals(mode, "natnetlatest", StringComparison.OrdinalIgnoreCase)) {
+				selectedAdapterName = NatNetLatestOptiTrackClient.AdapterName;
+				return new NatNetLatestOptiTrackClient(telemetryService);
+			}
+
+			selectedAdapterName = NatNet4OptiTrackClient.AdapterName;
 			return new NatNet4OptiTrackClient(telemetryService);
 		}
 
@@ -249,7 +260,7 @@ namespace Tracker {
 				optiTrackClient.ConnectAsync(options, CancellationToken.None).GetAwaiter().GetResult();
 				connectionConfirmed = optiTrackClient.IsConnected;
 				if (connectionConfirmed) {
-					compatibilityReport = NatNet4OptiTrackClient.BuildCompatibilityReport(connectionType);
+					compatibilityReport = BuildCompatibilityReport(connectionType);
 					EmitCompatibilityTelemetry(compatibilityReport);
 					StartUpdateTimer();
 					logger.Info("Success: Data port connected.");
@@ -454,12 +465,26 @@ namespace Tracker {
 					"sdk.compatibility",
 					TelemetrySeverity.Debug,
 					new TelemetryContext().SetTag("adapter_name", report.AdapterName)
+										  .SetTag("adapter_version", report.AdapterVersion)
+										  .SetTag("loaded_natnet_assembly", report.LoadedNatNetAssembly)
 										  .SetTag("natnet_assembly_version", report.NatNetAssemblyVersion)
+										  .SetTag("supported_sdk_version", report.SupportedSdkVersion)
+										  .SetTag("sdk_load_result", report.SdkLoadResult)
 										  .SetTag("plugin_version", report.PluginVersion)
 										  .SetTag("rhino_major_version", ParseRhinoMajor(report.RhinoVersion))
 										  .SetTag("grasshopper_version", report.GrasshopperVersion)
 										  .SetTag("connection_mode", report.ConnectionMode)
-										  .SetTag("sdk_load_failure_type", string.IsNullOrWhiteSpace(report.SdkLoadFailureType) ? "none" : report.SdkLoadFailureType));
+										  .SetTag("frame_schema_version", report.FrameSchemaVersion)
+										  .SetTag("sdk_exception_type", string.IsNullOrWhiteSpace(report.SdkExceptionType) ? "none" : report.SdkExceptionType));
+		}
+
+
+		private static SdkCompatibilityReport BuildCompatibilityReport(OptiTrackConnectionType connectionType) {
+			if (string.Equals(selectedAdapterName, NatNetLatestOptiTrackClient.AdapterName, StringComparison.OrdinalIgnoreCase)) {
+				return NatNetLatestOptiTrackClient.BuildCompatibilityReport(connectionType);
+			}
+
+			return NatNet4OptiTrackClient.BuildCompatibilityReport(connectionType);
 		}
 
 

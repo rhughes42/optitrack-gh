@@ -65,7 +65,7 @@ namespace OptiTrack.Telemetry {
 
 
 		private static string BuildDefaultReleaseName() {
-			string version = typeof(SentryTelemetryOptions).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "1.10.0";
+			string version = typeof(SentryTelemetryOptions).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "1.11.0";
 			return "optitrack-gh@" + version;
 		}
 

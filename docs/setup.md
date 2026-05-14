@@ -42,6 +42,11 @@ The project copies bundled NatNet files from `lib/NatNet` to the build output.
 6. Use the component context menu to enable rigid-body output when required.
 7. Inspect `Status`, `Warnings`, `Frame Number`, and `Telemetry Status`.
 
+Optional adapter selection:
+
+- default uses `NatNet4Adapter`
+- set environment variable `TRACKER_NATNET_ADAPTER=latest` before launching Rhino to use `NatNetLatestAdapter`
+
 The plugin does not require telemetry or Sentry configuration to run.
 
 ## Optional Sentry Configuration

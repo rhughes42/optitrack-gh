@@ -1,89 +1,66 @@
-# SDK Compatibility (v1.10.0)
+# SDK Compatibility (v1.11.0)
 
-This document defines the currently supported OptiTrack SDK surface and the required verification process before any SDK upgrade.
+This document records what SDK support is actually verified in this repository environment.
 
-## Current SDK Dependency
+## Local SDK Inspection Results
 
-- Primary managed SDK assembly: `NatNetML.dll`
-- Primary native runtime: `NatNetLib.dll`
-- Current adapter in use: `OptiTrack.NatNet4Adapter`
-- Underlying implementation: `OptiTrack.NatNet.NatNetOptiTrackClient`
-- Target framework: `.NET Framework 4.8` (`x64`)
+Files found in `lib/NatNet`:
 
-## Bundled SDK Files (Repository)
-
-Current repository bundle in `lib/NatNet`:
-
-- `NatNetML.dll`
-- `NatNetLib.dll`
+- `NatNetML.dll` file/product version: `3.0.0.0`
+- `NatNetLib.dll` file/product version: `3.0.0.0`
 - `NatNetLib.lib`
 - `NatNetML.xml`
 
-Do not replace these binaries without completing the verification checklist below.
+No additional newer NatNet SDK binaries were found in this repository workspace.
 
-## Current Motive/NatNet Assumptions
+## Current Supported Adapters
 
-- Motive is running and broadcasting NatNet.
-- Connection can be `Multicast` or `Unicast`.
-- NatNet connection uses command/data ports configured in component inputs.
-- Data descriptors are fetched at connect and refreshed when tracking models change.
-- Frame callback writes to latest-frame buffer; Grasshopper solve consumes at controlled cadence.
+- `OptiTrack.NatNet4Adapter` (legacy compatibility mode, preserved)
+- `OptiTrack.NatNetLatestAdapter` (latest available local SDK artifact mode)
 
-## NatNet SDK Usage Audit (Current Code)
+Both adapters intentionally use the same internal NatNet transport and existing domain model path to preserve replay and conversion behavior.
 
-- Assembly reference: `src/Tracker/Tracker.csproj` -> `NatNetML.dll` from `lib/NatNet`.
-- Managed client class: `NatNetML.NatNetClientML`.
-- Connection setup API: `NatNetClientML.ConnectParams` and `natNetClient.Connect(...)`.
-- Frame callback API: `natNetClient.OnFrameReady += OnFrameReady`.
-- Server descriptor API: `GetServerDescription(...)`.
-- Data descriptor API: `GetDataDescriptions(out List<DataDescriptor>)`.
-- Frame parsing path: `NatNetFrameConverter.ConvertFrame(...)` consuming `FrameOfMocapData`.
-- Descriptor handling: marker set / rigid body / skeleton / force plate descriptor type checks.
+## API Surface Comparison (NatNet4 Adapter vs Latest Adapter)
 
-## Compatibility Matrix
+In this repository state, both adapters currently use the same SDK API surface because only one SDK binary set is available:
 
-| Area | Supported Baseline | Verification Status | Notes |
-| --- | --- | --- | --- |
-| NatNet SDK | 4.0 bundle in `lib/NatNet` | Required per release | Current production adapter target. |
-| Motive | Version compatible with NatNet 4.0 | Site-specific | Validate in deployment environment. |
-| Rhino | 8.x | Required per release | Runtime-reported in diagnostics. |
-| Grasshopper | Rhino 8 bundled version | Required per release | Runtime-reported in diagnostics. |
-| .NET runtime target | .NET Framework 4.8 x64 | Source-controlled | Defined in `Tracker.csproj`. |
+- Connection setup: `NatNetClientML.ConnectParams` + `Connect(...)`
+- Local/server IP fields: unchanged (`LocalAddress`, `ServerAddress`)
+- Multicast/unicast mapping: unchanged
+- Frame callback: `OnFrameReady(FrameOfMocapData, NatNetClientML)`
+- Rigid body/marker/skeleton parsing: unchanged converter path
+- Data descriptor handling: unchanged (`GetDataDescriptions(...)`)
+- Timestamp/frame number: unchanged (`iFrame`, `fTimestamp`, host timestamp helpers)
 
-## Verification Checklist (Before Any SDK Upgrade)
+## Runtime Adapter Selection
 
-1. Confirm legal/licensing redistribution terms for candidate SDK binaries.
-2. Confirm managed/native assembly names and architecture compatibility (`x64`).
-3. Validate load success for `NatNetML.dll` and native dependencies.
-4. Verify connection setup API (`ConnectParams`, connection type, ports) remains compatible.
-5. Verify frame callback API signature and threading behavior.
-6. Verify frame parsing fields used by `NatNetFrameConverter` remain compatible.
-7. Verify data descriptor API and descriptor type handling remain compatible.
-8. Verify reconnect/disconnect cleanup and no duplicate event subscriptions.
-9. Verify live capture + replay workflows still function with v1.8.0 buffering behavior.
-10. Verify compatibility diagnostics and telemetry fields report expected versions safely.
+Selection is runtime via environment variable:
 
-## Upgrade Checklist (Managed Process)
+- `TRACKER_NATNET_ADAPTER=latest` -> `NatNetLatestAdapter`
+- default/other -> `NatNet4Adapter`
 
-1. Add/keep adapter boundary (do not directly swap all call sites).
-2. Implement candidate adapter in `OptiTrack.NatNetLatestAdapter`.
-3. Run manual compatibility matrix tests in a real Motive environment.
-4. Keep NatNet 4 adapter operational until migration is verified.
-5. Document failures/edge cases and rollback plan.
-6. Promote candidate adapter only after explicit verification evidence.
+## Verification Scope and Claims
 
-## Manual Test Checklist
+Verified here:
 
-Use this checklist after any SDK or adapter change:
+- SDK file presence and file versions
+- Adapter selection and compatibility diagnostics path
+- Non-sensitive telemetry field emission path (when telemetry is enabled)
+
+Not verified in this environment:
+
+- Live Motive streaming session against physical tracking hardware
+
+Do not claim broader SDK/Motive compatibility until live hardware validation is completed.
+
+## Manual Verification Checklist
 
 1. Motive running.
 2. NatNet broadcast enabled.
-3. Local/server IP set in component.
-4. At least one rigid body visible/tracked in Motive.
-5. Frame received and diagnostics updating.
-6. Disconnect/reconnect cycle works repeatedly.
-7. Replay mode still works with sample recording.
-8. Telemetry disabled mode still works.
-9. Telemetry enabled with test DSN emits sanitized diagnostics only.
-
-
+3. Local/server IP configured.
+4. Rigid body visible.
+5. Marker stream visible.
+6. Reconnect cycle succeeds.
+7. Replay mode still works.
+8. Telemetry disabled default verified.
+9. Telemetry enabled with test DSN emits only safe fields.

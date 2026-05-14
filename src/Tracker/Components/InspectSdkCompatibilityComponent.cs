@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 
 using OptiTrack.Core;
 using OptiTrack.NatNet4Adapter;
+using OptiTrack.NatNetLatestAdapter;
 using OptiTrack.Telemetry;
 
 
@@ -22,6 +23,7 @@ namespace Tracker.Components {
 
 		protected override void RegisterInputParams(GH_InputParamManager pManager) {
 			pManager.AddTextParameter("Connection Mode", "Mode", "Connection mode label for report context (Multicast/Unicast).", GH_ParamAccess.item, "Multicast");
+			pManager.AddTextParameter("Adapter", "Adapter", "Adapter mode: NatNet4 or Latest.", GH_ParamAccess.item, "NatNet4");
 			pManager.AddBooleanParameter("Enable Telemetry", "Telemetry", "Enable optional sanitized compatibility telemetry.", GH_ParamAccess.item, false);
 		}
 
@@ -35,25 +37,32 @@ namespace Tracker.Components {
 
 		protected override void SolveInstance(IGH_DataAccess DA) {
 			string connectionMode  = "Multicast";
+			string adapterMode     = "NatNet4";
 			bool   enableTelemetry = false;
 
 			DA.GetData(0, ref connectionMode);
-			DA.GetData(1, ref enableTelemetry);
+			DA.GetData(1, ref adapterMode);
+			DA.GetData(2, ref enableTelemetry);
 
 			ITelemetryService     telemetry = TelemetryServiceProvider.GetService(enableTelemetry);
-			SdkCompatibilityReport report   = NatNet4OptiTrackClient.BuildCompatibilityReport(ParseMode(connectionMode));
+			SdkCompatibilityReport report = string.Equals(adapterMode, "Latest", StringComparison.OrdinalIgnoreCase)
+					? NatNetLatestOptiTrackClient.BuildCompatibilityReport(ParseMode(connectionMode))
+					: NatNet4OptiTrackClient.BuildCompatibilityReport(ParseMode(connectionMode));
 			List<string>           lines    = report.ToDiagnosticsLines();
 
 			telemetry.CaptureMessage(
 					"sdk.compatibility",
 					TelemetrySeverity.Debug,
 					new TelemetryContext().SetTag("adapter_name", report.AdapterName)
+										  .SetTag("adapter_version", report.AdapterVersion)
 										  .SetTag("natnet_assembly_version", report.NatNetAssemblyVersion)
+										  .SetTag("sdk_load_result", report.SdkLoadResult)
 										  .SetTag("plugin_version", report.PluginVersion)
 										  .SetTag("rhino_major_version", ParseRhinoMajor(report.RhinoVersion))
 										  .SetTag("grasshopper_version", report.GrasshopperVersion)
 										  .SetTag("connection_mode", report.ConnectionMode)
-										  .SetTag("sdk_load_failure_type", string.IsNullOrWhiteSpace(report.SdkLoadFailureType) ? "none" : report.SdkLoadFailureType));
+										  .SetTag("frame_schema_version", report.FrameSchemaVersion)
+										  .SetTag("sdk_exception_type", string.IsNullOrWhiteSpace(report.SdkExceptionType) ? "none" : report.SdkExceptionType));
 
 			DA.SetDataList(0, lines);
 			DA.SetData(1, report.AdapterName);

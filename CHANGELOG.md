@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.11.0
+
+- Added concrete `OptiTrack.NatNetLatestAdapter` implementation and preserved `OptiTrack.NatNet4Adapter`.
+- Added runtime adapter selection via environment variable `TRACKER_NATNET_ADAPTER` (`latest` or default natnet4 mode).
+- Expanded runtime compatibility diagnostics with safe fields: `adapter_name`, `adapter_version`, `loaded_natnet_assembly`, `natnet_assembly_version`, `supported_sdk_version`, `sdk_load_result`, `connection_mode`, `frame_schema_version`, `sdk_exception_type`.
+- Expanded optional Sentry compatibility diagnostics with sanitized low-cardinality adapter/SDK tags.
+- Updated compatibility and SDK docs with exact locally inspected SDK artifacts and explicit verification scope.
+- Added SDK migration notes from v1.10.0 and adapter-switch guidance.
+- Preserved replay mode and existing OptiTrack domain model/conversion behavior.
+
 ## v1.10.0
 
 - Updated plugin assembly version metadata to `1.10.0`.

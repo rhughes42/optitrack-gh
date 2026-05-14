@@ -7,19 +7,26 @@ using OptiTrack.NatNet;
 using OptiTrack.Telemetry;
 
 
-namespace OptiTrack.NatNet4Adapter {
+namespace OptiTrack.NatNetLatestAdapter {
 
-	public sealed class NatNet4OptiTrackClient : IOptiTrackClient {
+	/// <summary>
+	/// Adapter for the newest NatNet SDK artifacts available in the local repository/runtime.
+	/// Uses the same internal NatNet transport implementation and preserves existing models.
+	/// </summary>
+	public sealed class NatNetLatestOptiTrackClient : IOptiTrackClient {
 
-		public const string AdapterName = "NatNet4Adapter";
+		public const string AdapterName = "NatNetLatestAdapter";
+
 		public const string AdapterVersion = "1.11.0";
-		public const string SupportedSdkVersion = "natnet4_compat_mode";
+
+		public const string SupportedSdkVersion = "latest_local_available";
+
 		public const string FrameSchemaVersion = "natnet_frame_v1";
 
 		private readonly NatNetOptiTrackClient innerClient;
 
 
-		public NatNet4OptiTrackClient(ITelemetryService telemetryService) {
+		public NatNetLatestOptiTrackClient(ITelemetryService telemetryService) {
 			innerClient = new NatNetOptiTrackClient(telemetryService);
 			innerClient.FrameReceived     += (sender, args) => FrameReceived?.Invoke(sender, args);
 			innerClient.ConnectionChanged += (sender, args) => ConnectionChanged?.Invoke(sender, args);

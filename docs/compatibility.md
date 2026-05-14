@@ -2,39 +2,48 @@
 
 Tracker is a Rhino/Grasshopper plugin for OptiTrack Motive through NatNet.
 
-For SDK-specific policy and upgrade workflow, see [sdk-compatibility.md](sdk-compatibility.md) and [sdk-upgrade-notes.md](sdk-upgrade-notes.md).
+For SDK policy and upgrade workflow, see [sdk-compatibility.md](sdk-compatibility.md), [sdk-upgrade-notes.md](sdk-upgrade-notes.md), and [sdk-migration-notes.md](sdk-migration-notes.md).
 
-## Runtime and SDK Matrix (v1.10.0)
+## Runtime and SDK Matrix (v1.11.0)
 
-| Area | Current / Expected | Tested | Notes |
+| Area | Version / Value | Tested Status | Notes |
 | --- | --- | --- | --- |
-| Rhino version | Rhino 8 | TBD | Runtime diagnostics include Rhino version. |
-| Grasshopper version | Rhino 8 bundled Grasshopper | TBD | Runtime diagnostics include Grasshopper version. |
-| Windows version | Windows 10/11 | TBD | NatNet and Rhino plugin workflow are Windows-oriented. |
-| Motive version | Compatible with NatNet 4.0 | TBD | Validate against deployment environment. |
-| NatNet SDK support | NatNet 4.0 adapter baseline | TBD | Active adapter is `OptiTrack.NatNet4Adapter`. |
-| Candidate latest SDK support | Not enabled | N/A | Placeholder only; requires formal verification. |
-| .NET target framework | .NET Framework 4.8, x64 | Source-controlled | Required by `src/Tracker/Tracker.csproj`. |
-| Sentry SDK version | 6.5.0 | Build validated | Optional and disabled unless configured. |
+| Windows | Microsoft Windows 11 Home 10.0.26200 | Verified in local build environment | Captured from local system. |
+| Rhino | Rhino 8.x expected | Runtime-detected only | Actual version depends on user installation. |
+| Grasshopper | Rhino 8 bundled GH | Runtime-detected only | Reported at runtime by diagnostics component. |
+| Motive | Not verified in this environment | Not tested | Hardware/software unavailable in this workspace. |
+| NatNet managed assembly file version | `3.0.0.0` (`NatNetML.dll`) | Verified from local files | Latest available SDK artifact in this environment. |
+| NatNet native assembly file version | `3.0.0.0` (`NatNetLib.dll`) | Verified from local files | Latest available SDK artifact in this environment. |
+| NatNet4 adapter | `OptiTrack.NatNet4Adapter` | Supported | Legacy compatibility mode retained. |
+| NatNet latest adapter | `OptiTrack.NatNetLatestAdapter` | Supported for latest local SDK artifact | Uses same frame/domain model path with updated diagnostics. |
+| .NET target framework | .NET Framework 4.8 x64 | Source-controlled | Defined in `src/Tracker/Tracker.csproj`. |
+| Sentry SDK | 6.5.0 package reference | Source-controlled | Optional and disabled unless configured. |
 
-## Current Adapter Strategy
+## Adapter Selection
 
-- Active adapter boundary: `OptiTrack.NatNet4Adapter`
-- Existing implementation retained: `OptiTrack.NatNet`
-- Future adapter placeholder: `OptiTrack.NatNetLatestAdapter`
+Runtime adapter selection is environment-driven:
 
-## Compatibility Diagnostics
+- `TRACKER_NATNET_ADAPTER=latest` selects `NatNetLatestAdapter`
+- Any other value (or unset) selects `NatNet4Adapter`
 
-Tracker v1.10.0 emits safe compatibility diagnostics (component diagnostics and optional telemetry), including:
+This keeps existing behavior stable while allowing explicit selection of the latest local SDK adapter path.
+
+## Safe Compatibility Diagnostics
+
+Tracker emits non-sensitive compatibility diagnostics fields:
 
 - `adapter_name`
-- `plugin_version`
+- `adapter_version`
+- `loaded_natnet_assembly`
 - `natnet_assembly_version`
+- `supported_sdk_version`
+- `sdk_load_result`
 - `connection_mode`
+- `frame_schema_version`
+- `sdk_exception_type`
+- `plugin_version`
 - `rhino_version`
 - `grasshopper_version`
 - `sentry_sdk_version`
-- `sdk_load_failure_type`
 
-Sensitive fields such as IPs, file paths, usernames, machine names, and frame payload data are excluded.
-
+Sensitive fields (IPs, file paths, usernames, machine names, marker/rigid-body content, raw frames, project/model names) are excluded.

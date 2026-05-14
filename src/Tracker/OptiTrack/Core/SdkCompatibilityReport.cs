@@ -12,7 +12,17 @@ namespace OptiTrack.Core {
 
 		public string AdapterName { get; set; } = "unknown";
 
+		public string AdapterVersion { get; set; } = "unknown";
+
+		public string SupportedSdkVersion { get; set; } = "unknown";
+
+		public string LoadedNatNetAssembly { get; set; } = "NatNetML";
+
 		public string NatNetAssemblyVersion { get; set; } = "not_loaded";
+
+		public string SdkLoadResult { get; set; } = "unknown";
+
+		public string FrameSchemaVersion { get; set; } = "unknown";
 
 		public string ConnectionMode { get; set; } = "unknown";
 
@@ -22,28 +32,36 @@ namespace OptiTrack.Core {
 
 		public string SentrySdkVersion { get; set; } = "not_loaded";
 
-		public string SdkLoadFailureType { get; set; } = string.Empty;
+		public string SdkExceptionType { get; set; } = string.Empty;
 
 
 		public List<string> ToDiagnosticsLines() {
 			return new List<string> {
 					"adapter_name=" + AdapterName,
+					"adapter_version=" + AdapterVersion,
 					"plugin_version=" + PluginVersion,
+					"loaded_natnet_assembly=" + LoadedNatNetAssembly,
 					"natnet_assembly_version=" + NatNetAssemblyVersion,
+					"supported_sdk_version=" + SupportedSdkVersion,
+					"sdk_load_result=" + SdkLoadResult,
 					"connection_mode=" + ConnectionMode,
+					"frame_schema_version=" + FrameSchemaVersion,
 					"rhino_version=" + RhinoVersion,
 					"grasshopper_version=" + GrasshopperVersion,
 					"sentry_sdk_version=" + SentrySdkVersion,
-					"sdk_load_failure_type=" + (string.IsNullOrWhiteSpace(SdkLoadFailureType) ? "none" : SdkLoadFailureType)
+					"sdk_exception_type=" + (string.IsNullOrWhiteSpace(SdkExceptionType) ? "none" : SdkExceptionType)
 			};
 		}
 
 
-		public static SdkCompatibilityReport Collect(string adapterName, string connectionMode) {
+		public static SdkCompatibilityReport Collect(string adapterName, string adapterVersion, string connectionMode, string supportedSdkVersion, string frameSchemaVersion) {
 			SdkCompatibilityReport report = new SdkCompatibilityReport {
 					AdapterName    = adapterName ?? "unknown",
+					AdapterVersion = adapterVersion ?? "unknown",
 					ConnectionMode = connectionMode ?? "unknown",
-					PluginVersion  = typeof(SdkCompatibilityReport).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown"
+					SupportedSdkVersion = supportedSdkVersion ?? "unknown",
+					FrameSchemaVersion  = frameSchemaVersion ?? "unknown",
+					PluginVersion       = typeof(SdkCompatibilityReport).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "unknown"
 			};
 
 			try {
@@ -57,10 +75,12 @@ namespace OptiTrack.Core {
 			catch { }
 
 			try {
-				report.NatNetAssemblyVersion = FindAssemblyVersion("NatNetML");
+				report.NatNetAssemblyVersion = FindAssemblyVersion("NatNetML", out string loadResult);
+				report.SdkLoadResult         = loadResult;
 			}
 			catch (Exception exception) {
-				report.SdkLoadFailureType = exception.GetType().Name;
+				report.SdkLoadResult   = "exception";
+				report.SdkExceptionType = exception.GetType().Name;
 			}
 
 			try {
@@ -72,19 +92,22 @@ namespace OptiTrack.Core {
 		}
 
 
-		private static string FindAssemblyVersion(string assemblyName) {
+		private static string FindAssemblyVersion(string assemblyName, out string loadResult) {
 			Assembly loaded = AppDomain.CurrentDomain.GetAssemblies()
 									 .FirstOrDefault(a => string.Equals(a.GetName().Name, assemblyName, StringComparison.OrdinalIgnoreCase));
 
 			if (loaded != null) {
+				loadResult = "already_loaded";
 				return loaded.GetName().Version?.ToString() ?? "unknown";
 			}
 
 			try {
 				Assembly onDemand = Assembly.Load(assemblyName);
+				loadResult = "loaded_on_demand";
 				return onDemand.GetName().Version?.ToString() ?? "unknown";
 			}
 			catch {
+				loadResult = "not_loaded";
 				return "not_loaded";
 			}
 		}

@@ -54,7 +54,7 @@ namespace OptiTrack.Telemetry {
 													});
 
 				SentrySdk.SetTag("plugin_version", GetPluginVersion());
-				SentrySdk.SetTag("adapter_name", "NatNet4Adapter");
+				SentrySdk.SetTag("adapter_name", ResolveAdapterName());
 				SentrySdk.SetTag("rhino_version", GetRhinoVersion());
 				SentrySdk.SetTag("sentry_sdk_version", typeof(SentrySdk).Assembly.GetName().Version?.ToString() ?? "unknown");
 
@@ -171,6 +171,17 @@ namespace OptiTrack.Telemetry {
 			catch {
 				return "unknown";
 			}
+		}
+
+
+		private static string ResolveAdapterName() {
+			string mode = Environment.GetEnvironmentVariable("TRACKER_NATNET_ADAPTER") ?? string.Empty;
+			if (string.Equals(mode, "latest", StringComparison.OrdinalIgnoreCase)
+				|| string.Equals(mode, "natnetlatest", StringComparison.OrdinalIgnoreCase)) {
+				return "NatNetLatestAdapter";
+			}
+
+			return "NatNet4Adapter";
 		}
 
 	}

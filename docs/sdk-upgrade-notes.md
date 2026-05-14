@@ -1,50 +1,43 @@
-# SDK Upgrade Notes (v1.10.0)
+# SDK Upgrade Notes (v1.11.0)
 
-## NatNet 4.0 Current Adapter
+## Summary
 
-- Namespace/folder: `OptiTrack.NatNet4Adapter`
-- Runtime class: `NatNet4OptiTrackClient`
-- Delegates to: `OptiTrack.NatNet.NatNetOptiTrackClient`
-- Status: active and supported baseline
+v1.11.0 adds a concrete `NatNetLatestAdapter` path while preserving `NatNet4Adapter`.
 
-## Latest SDK Candidate Adapter
+Because only one NatNet SDK binary set is available in this repository (`NatNetML.dll`/`NatNetLib.dll` file version `3.0.0.0`), both adapters currently map to the same underlying transport implementation.
 
-- Namespace/folder placeholder: `OptiTrack.NatNetLatestAdapter`
-- Current status: placeholder only; not enabled in runtime path
-- Rule: do not claim support until verification checklist is completed
+## NatNet 4.0 Compatibility Adapter
 
-## Breaking API Changes to Check
+- Namespace: `OptiTrack.NatNet4Adapter`
+- Status: retained and selectable
+- Purpose: preserve legacy adapter contract for existing deployments
 
-When evaluating a newer NatNet SDK, validate:
+## Latest Local SDK Adapter
 
-- `NatNetClientML` constructor and lifecycle behavior
-- `ConnectParams` shape and required fields
-- Frame callback signature (`OnFrameReady`) and event semantics
-- `FrameOfMocapData` fields consumed by converter
-- Data descriptor APIs and descriptor subtype casts
-- Connection/disconnection behavior and error codes
+- Namespace: `OptiTrack.NatNetLatestAdapter`
+- Status: implemented and selectable
+- Purpose: explicit adapter target for the newest SDK artifacts currently available in local environment
 
-## Connection Behavior Checks
+## Key Comparison Areas
 
-- Connect/disconnect success and failure paths
-- Multicast vs unicast behavior
-- Reconnect stability and cleanup correctness
-- No orphaned callbacks/timers/tasks after disconnect
+No API deltas were observed in current local SDK artifacts for the code paths used here:
 
-## Frame Data Model Checks
+- connection setup
+- local/server IP handling
+- multicast/unicast mapping
+- frame callback signature
+- rigid body/marker/skeleton frame parsing
+- data descriptor handling
+- frame number/timestamp handling
 
-- Marker count and marker access APIs
-- Rigid body payload fields and tracking flags
-- Timestamp/frame numbering continuity
-- Descriptor refresh when tracking models change
+## Selection Model
 
-## Licensing and Redistribution
+Runtime selection via environment variable:
 
-Before bundling a new SDK version, verify:
+- `TRACKER_NATNET_ADAPTER=latest` -> latest adapter
+- otherwise -> natnet4 adapter
 
-- redistribution rights for managed and native binaries
-- any new required runtime files
-- documentation and attribution requirements
+## Redistribution and Licensing
 
-Do not commit updated SDK binaries without confirming legal redistribution terms.
-
+Do not remove old SDK files unless licensing or compatibility requires it.
+If future replacement/removal is required, document the reason and migration path in release notes and compatibility docs.

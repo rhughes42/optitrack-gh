@@ -90,7 +90,7 @@
     <Compile Include="OptiTrack\NatNet\NatNetFrameConverter.cs" />
     <Compile Include="OptiTrack\NatNet\NatNetOptiTrackClient.cs" />
     <Compile Include="OptiTrack\NatNet4Adapter\NatNet4OptiTrackClient.cs" />
-    <Compile Include="OptiTrack\NatNetLatestAdapter\NatNetLatestAdapterPlaceholder.cs" />
+    <Compile Include="OptiTrack\NatNetLatestAdapter\NatNetLatestOptiTrackClient.cs" />
     <Compile Include="OptiTrack\Recording\OptiTrackFrameSnapshot.cs" />
     <Compile Include="OptiTrack\Recording\OptiTrackRecordingModels.cs" />
     <Compile Include="OptiTrack\Recording\OptiTrackRecordingSerializer.cs" />
