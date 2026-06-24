@@ -1,5 +1,7 @@
 # Telemetry and Error Reporting Policy
 
+[Documentation Index](./README.md)
+
 Tracker must remain usable without telemetry. Error reporting is optional and disabled unless explicitly enabled in Grasshopper and configured by the user or deployment owner.
 
 ## Defaults

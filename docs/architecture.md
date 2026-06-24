@@ -1,5 +1,7 @@
 # Architecture
 
+[Documentation Index](./README.md)
+
 Tracker separates Grasshopper UI code from NatNet SDK-specific code so future NatNet upgrades, tests, and telemetry work can happen behind stable internal boundaries.
 
 ```mermaid

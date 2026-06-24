@@ -4,6 +4,9 @@ using System.Text.RegularExpressions;
 
 namespace OptiTrack.Telemetry {
 
+	/// <summary>
+	/// Provides helpers for sanitizing telemetry keys and values.
+	/// </summary>
 	public static class TelemetrySanitizer {
 		private static readonly Regex IPv4Pattern = new Regex( @"\b(?:\d{1,3}\.){3}\d{1,3}\b", RegexOptions.Compiled );
 		private static readonly Regex WindowsPathPattern = new Regex( @"[A-Za-z]:\\[^\s]+", RegexOptions.Compiled );
@@ -28,6 +31,11 @@ namespace OptiTrack.Telemetry {
 			"user"
 		};
 
+		/// <summary>
+		/// Normalizes a telemetry key to a safe lowercase format.
+		/// </summary>
+		/// <param name="key">The source key.</param>
+		/// <returns>A normalized key value.</returns>
 		public static string SanitizeKey( string key ) {
 			if ( string.IsNullOrWhiteSpace( key ) ) {
 				return "unknown";
@@ -36,6 +44,11 @@ namespace OptiTrack.Telemetry {
 			return key.Trim().Replace( " ", "_" ).ToLowerInvariant();
 		}
 
+		/// <summary>
+		/// Redacts sensitive value patterns such as IP addresses, email addresses, and Windows paths.
+		/// </summary>
+		/// <param name="value">The source value.</param>
+		/// <returns>A sanitized value suitable for telemetry payloads.</returns>
 		public static string SanitizeValue( string value ) {
 			if ( string.IsNullOrEmpty( value ) ) {
 				return string.Empty;
@@ -47,6 +60,11 @@ namespace OptiTrack.Telemetry {
 			return sanitized;
 		}
 
+		/// <summary>
+		/// Determines whether a key appears sensitive and should be redacted.
+		/// </summary>
+		/// <param name="key">The key to evaluate.</param>
+		/// <returns><c>true</c> when the key appears sensitive; otherwise, <c>false</c>.</returns>
 		public static bool IsSensitiveKey( string key ) {
 			if ( string.IsNullOrWhiteSpace( key ) ) {
 				return false;
@@ -61,6 +79,12 @@ namespace OptiTrack.Telemetry {
 			return false;
 		}
 
+		/// <summary>
+		/// Sanitizes a tag value and fully redacts values for sensitive keys.
+		/// </summary>
+		/// <param name="key">Tag key.</param>
+		/// <param name="value">Tag value.</param>
+		/// <returns>A sanitized or redacted tag value.</returns>
 		public static string SanitizeTagValue( string key, string value ) {
 			if ( IsSensitiveKey( key ) ) {
 				return "[redacted]";

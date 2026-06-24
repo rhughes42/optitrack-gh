@@ -1,5 +1,7 @@
 # Build
 
+[Documentation Index](./README.md)
+
 Tracker is a .NET Framework Grasshopper plugin. Local builds are the source of truth because runtime validation requires Rhino, Grasshopper, Motive, and NatNet.
 
 ## Local Requirements

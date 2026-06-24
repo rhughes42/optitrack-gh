@@ -1,5 +1,7 @@
 # Setup
 
+[Documentation Index](./README.md)
+
 ## Build Locally
 
 1. Install Visual Studio with .NET Framework 4.8 targeting support.
