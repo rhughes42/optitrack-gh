@@ -5,6 +5,9 @@ using Sentry;
 
 namespace OptiTrack.Telemetry {
 
+	/// <summary>
+	/// Sentry-backed telemetry implementation with built-in data sanitization.
+	/// </summary>
 	public sealed class SentryTelemetryService : ITelemetryService, IDisposable {
 		private readonly IDisposable sentry;
 		private bool disposed;
@@ -14,8 +17,16 @@ namespace OptiTrack.Telemetry {
 			Status = status;
 		}
 
+		/// <summary>
+		/// Gets the current service status string.
+		/// </summary>
 		public string Status { get; private set; }
 
+		/// <summary>
+		/// Creates a telemetry service instance based on runtime configuration.
+		/// </summary>
+		/// <param name="enabled">Whether telemetry was enabled by user intent.</param>
+		/// <returns>A configured Sentry service or a no-op fallback.</returns>
 		public static ITelemetryService Create( bool enabled ) {
 			if ( !enabled ) {
 				return new NoOpTelemetryService( "disabled" );
@@ -51,6 +62,11 @@ namespace OptiTrack.Telemetry {
 			}
 		}
 
+		/// <summary>
+		/// Captures a sanitized exception event in Sentry.
+		/// </summary>
+		/// <param name="exception">The exception to capture.</param>
+		/// <param name="context">Additional event tags and metrics.</param>
 		public void CaptureException( Exception exception, TelemetryContext context ) {
 			if ( exception == null ) {
 				return;
@@ -67,6 +83,12 @@ namespace OptiTrack.Telemetry {
 			}
 		}
 
+		/// <summary>
+		/// Captures a sanitized message event in Sentry.
+		/// </summary>
+		/// <param name="message">The message text.</param>
+		/// <param name="severity">The message severity level.</param>
+		/// <param name="context">Additional event tags and metrics.</param>
 		public void CaptureMessage( string message, TelemetrySeverity severity, TelemetryContext context ) {
 			try {
 				SentrySdk.CaptureMessage( TelemetrySanitizer.SanitizeValue( message ), scope => ApplyContext( scope, context ), ToSentryLevel( severity ) );
@@ -75,10 +97,19 @@ namespace OptiTrack.Telemetry {
 			}
 		}
 
+		/// <summary>
+		/// Starts a timed telemetry span.
+		/// </summary>
+		/// <param name="operationName">The operation name.</param>
+		/// <param name="context">Initial context associated with the span.</param>
+		/// <returns>A telemetry scope that publishes duration when disposed.</returns>
 		public TelemetryScope StartSpan( string operationName, TelemetryContext context ) {
 			return new TelemetryScope( this, operationName, context );
 		}
 
+		/// <summary>
+		/// Disposes the Sentry SDK session.
+		/// </summary>
 		public void Dispose() {
 			if ( disposed ) {
 				return;

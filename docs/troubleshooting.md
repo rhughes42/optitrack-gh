@@ -1,5 +1,7 @@
 # Troubleshooting
 
+[Documentation Index](./README.md)
+
 ## Blocked `.gha` or `.dll` Files
 
 Windows may block files downloaded from the internet. Right-click the `.zip`, `.gha`, or `.dll`, open **Properties**, select **Unblock** if shown, and apply the change. Restart Rhino after unblocking.

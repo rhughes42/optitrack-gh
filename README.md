@@ -23,10 +23,13 @@ The bundled SDK license status should be reviewed before redistribution. The fil
 
 ## Repository Layout
 
-- `src/Tracker` - Grasshopper plugin source and project file
-- `lib/NatNet` - bundled NatNet SDK runtime/reference files
-- `docs` - setup, compatibility, troubleshooting, build, and telemetry notes
-- `examples` - reserved for future example Grasshopper definitions
+- [`src`](src/README.md) - source index for plugin implementation
+- [`src/Tracker`](src/Tracker/README.md) - Grasshopper plugin source and project file
+- [`src/Tracker/OptiTrack`](src/Tracker/OptiTrack/README.md) - core contracts, NatNet adapter, and telemetry modules
+- [`lib`](lib/README.md) - bundled runtime/reference assets
+- [`lib/NatNet`](lib/NatNet/README.md) - NatNet SDK runtime/reference files
+- [`docs`](docs/README.md) - setup, compatibility, troubleshooting, build, and telemetry notes
+- [`examples`](examples/README.md) - sample definition guidance
 
 ## Installation
 
@@ -39,6 +42,10 @@ The bundled SDK license status should be reviewed before redistribution. The fil
 4. Restart Rhino and Grasshopper.
 
 See [docs/setup.md](docs/setup.md) for more detail.
+
+## Documentation Index
+
+For navigable documentation by area, use [docs/README.md](docs/README.md).
 
 ## Basic Usage
 

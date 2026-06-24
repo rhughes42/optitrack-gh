@@ -1,5 +1,7 @@
 # Compatibility
 
+[Documentation Index](./README.md)
+
 Tracker is a Rhino/Grasshopper plugin for OptiTrack Motive through NatNet. This matrix records the expected and tested combinations. Rows marked "TBD" need validation on real capture systems.
 
 | Area | Current / Expected | Tested | Notes |
